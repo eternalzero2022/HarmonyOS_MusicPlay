@@ -2,6 +2,7 @@ import { Music } from "../viewmodel/MusicViewModel"
 import { DatabaseManager } from "../manager/DatabaseManager"
 import { router } from '@kit.ArkUI';
 import { AVPlayerManager } from "../manager/AVPlayerManager"
+import { Constants } from '../constants/Constants'
 
 @Entry
 @Component
@@ -42,7 +43,7 @@ struct History {
           ListItem() {
             Row() {
               Image(history.imageUrl === "" ?
-                "https://tse1.mm.bing.net/th?id=OIP.CDxtKQRYAPTUqYVGxNKuLQHaHa&w=474&h=474&c=7" : history.imageUrl)
+              Constants.DEFAULT_MUSIC_IMAGE : history.imageUrl)
                 .height(40)
                 .height(40)
                 .margin(10)

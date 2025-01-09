@@ -1,9 +1,9 @@
 import {AVPlayerManager} from "../manager/AVPlayerManager"
 import { taskpool } from '@kit.ArkTS'
-import { Music, MusicPlayStrategy } from '../viewmodel/MusicViewModel';
+import { Music, MusicPlayStrategy, PlayState } from '../viewmodel/MusicViewModel';
 import { DatabaseManager } from '../manager/DatabaseManager';
 import { router } from '@kit.ArkUI';
-
+import { PlayBar } from '../view/PlayBar'
 /**
  * AVPlayerManager和DatabaseManager使用示例
  */
@@ -18,6 +18,8 @@ struct Index {
 
   build() {
     Column(){
+      PlayBar()
+
       Button('播放音乐')
         .width(200)
         .height(40)

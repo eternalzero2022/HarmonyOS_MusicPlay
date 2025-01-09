@@ -2,7 +2,8 @@ import { media } from "@kit.MediaKit";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { audio } from "@kit.AudioKit";
 import { DatabaseManager } from "./DatabaseManager";
-import { Music, MusicPlayStrategy } from "../viewmodel/MusicViewModel";
+import { Music, MusicPlayStrategy, PlayState, EmptyMusic } from "../viewmodel/MusicViewModel";
+import App from "@system.app";
 
 /**
  * 音乐播放逻辑实现类。提供一些与音乐播放相关的方法，供其它组件调用播放
@@ -10,20 +11,52 @@ import { Music, MusicPlayStrategy } from "../viewmodel/MusicViewModel";
  */
 export class AVPlayerManager{
   private avPlayer: media.AVPlayer | null = null;
-  
+
   private timeUpdateCallback: (time: number)=>void = (time: number)=>{}
-  
+
   private prepareCallback: (musicTime: number)=>void = (musicTime: number)=>{}
-  
+
   private musicList: Array<Music> = []
-  
+
   private currentMusicIndex = 0;
-  
+
   private strategy: MusicPlayStrategy = MusicPlayStrategy.SEQUENCE;
-  
+
+  private currentMusic: SubscribedAbstractProperty<Music> = AppStorage.link('currentMusic')
+
+  private currentState: SubscribedAbstractProperty<PlayState> = AppStorage.link('currentState')
+
+  private currentStrategy: SubscribedAbstractProperty<MusicPlayStrategy> = AppStorage.link('currentStrategy')
+
+  private currentTime: SubscribedAbstractProperty<number> = AppStorage.link('currentTime')
+
+  private totalTime: SubscribedAbstractProperty<number> = AppStorage.link('totalTime')
+
+  private time: number = 0
 
   private static instance: AVPlayerManager;
-  private constructor(){}
+
+  private constructor() {
+    AppStorage.setOrCreate('currentMusic', EmptyMusic)
+    AppStorage.setOrCreate('currentState', PlayState.PAUSE)
+    AppStorage.setOrCreate('currentStrategy', MusicPlayStrategy.SEQUENCE)
+    AppStorage.setOrCreate('currentTime', 0)
+    AppStorage.setOrCreate('totalTime', 1)
+
+    this.currentMusic = AppStorage.link('currentMusic')
+    this.currentState = AppStorage.link('currentState')
+    this.currentStrategy = AppStorage.link('currentStrategy')
+    this.currentTime = AppStorage.link('currentTime')
+    this.totalTime = AppStorage.link('totalTime')
+
+    this.timeUpdateCallback = (time: number)=> {
+      if (time - this.time <= 1000) return
+      this.time = time
+      console.log('AVPlayer timeUpdate ' + time)
+      this.currentTime.set(time)
+    }
+  }
+
   public static async getInstance(): Promise<AVPlayerManager>{
     if(!AVPlayerManager.instance){
       console.info("即将创建实例")
@@ -32,10 +65,10 @@ export class AVPlayerManager{
     }
     return AVPlayerManager.instance;
   }
-  
-  
- 
-  
+
+
+
+
 
   /**
    * 设置当前的播放列表。设置完毕后即自动播放该列表中的音乐，并在一首音乐播放完毕后根据音乐策略自动切换至下一首音乐
@@ -52,7 +85,7 @@ export class AVPlayerManager{
       await this.loadListMusic()
     }
   }
-  
+
   /**
    * 设置音乐播放策略，分为顺序播放、随机播放、单曲循环。
    * 默认为顺序播放
@@ -60,8 +93,9 @@ export class AVPlayerManager{
    */
   setStrategy(strategy: MusicPlayStrategy){
     this.strategy = strategy
+    this.currentStrategy.set(strategy)
   }
-  
+
   /**
    * 跳转至播放列表中的下一首曲子。若此时音乐列表为空，则重新播放当前正在播放的曲子
    */
@@ -121,26 +155,28 @@ export class AVPlayerManager{
       }
     }
   }
-  
-  
+
+
   /**
    * 暂停播放音乐。可以通过调用continue函数继续播放音乐
    */
   async pause(){
     if(this.avPlayer){
+      this.currentState.set(PlayState.PAUSE)
       await this.avPlayer.pause()
     }
   }
-  
+
   /**
    * 在音乐暂停后继续播放音乐。从暂停的位置开始继续播放
    */
   async continue(){
     if(this.avPlayer){
+      this.currentState.set(PlayState.PLAYING)
       await this.avPlayer.play()
     }
   }
-  
+
   /**
    * 设置当前音乐播放进度。使用百分比设定，音乐会跳转至整首音乐的该百分比处开始播放
    * @param timePercent 要跳转到的音乐播放进度百分比
@@ -150,20 +186,22 @@ export class AVPlayerManager{
       return
     }
     if(this.avPlayer){
+      this.time = 0
       this.avPlayer.seek(this.avPlayer.duration * timePercent)
     }
   }
-  
+
   /**
    * 设置当前音乐播放进度。使用绝对时间来设定，单位为毫秒，音乐会跳转至整首音乐的该时间处开始播放
    * @param time 要跳转至的音乐播放进度时间，单位为毫秒
    */
   async seekByTime(time: number){
     if(this.avPlayer){
+      this.time = 0
       this.avPlayer.seek(time)
     }
   }
-  
+
   /**
    * 设置当音乐进度变化的时候的回调函数，回调函数的参数为当前音乐播放进度时间。
    * 可用于更新进度条
@@ -172,7 +210,7 @@ export class AVPlayerManager{
   async setTimeUpdateCallBack(callBack: (time: number)=>void){
     this.timeUpdateCallback = callBack
   }
-  
+
   /**
    * 设置当加载新的音乐的时候的回调函数，回调函数的参数为当前音乐的总时长
    * 可用于为进度条设置当前音乐时长
@@ -189,6 +227,8 @@ export class AVPlayerManager{
    */
   async loadMusic(url:string){
     if(this.avPlayer){
+      this.currentMusic.set(this.musicList[this.currentMusicIndex])
+      this.currentState.set(PlayState.PLAYING)
       await this.avPlayer.reset()
       this.avPlayer.url = url
     }
@@ -223,6 +263,12 @@ export class AVPlayerManager{
       this.timeUpdateCallback(time)
     })
 
+    // 设置歌曲总时长
+    avPlayer.on('durationUpdate', (duration: number) => {
+      console.info('AVPlayer durationUpdate' + duration)
+      this.totalTime.set(duration)
+    })
+
     //状态机变化回调函数
     avPlayer.on('stateChange',async (state: string,reason: media.StateChangeReason)=>{
       switch (state){
@@ -237,7 +283,7 @@ export class AVPlayerManager{
           avPlayer.audioRendererInfo = {
             usage: audio.StreamUsage.STREAM_USAGE_MUSIC,
             rendererFlags: 0
-          }
+          }// 177711
           avPlayer.prepare()
           break
 
@@ -310,12 +356,13 @@ export class AVPlayerManager{
   private async loadListMusic(){
     if(this.avPlayer){
       if(this.currentMusicIndex >= 0 && this.currentMusicIndex < this.musicList.length){
+        this.time = 0
         await this.loadMusic(this.musicList[this.currentMusicIndex].musicUrl)
         this.saveHistory(this.musicList[this.currentMusicIndex])
       }
     }
   }
-  
+
   /**
    * 将当前播放的音乐存入历史记录
    * @param music 当前播放的音乐
@@ -323,8 +370,8 @@ export class AVPlayerManager{
   private async saveHistory(music: Music){
     DatabaseManager.saveMusicHistory(music,getContext(this))
   }
-  
-  
-  
-  
+
+
+
+
 }
