@@ -2,6 +2,7 @@ import {AVPlayerManager} from "../manager/AVPlayerManager"
 import { taskpool } from '@kit.ArkTS'
 import { Music, MusicPlayStrategy } from '../viewmodel/MusicViewModel';
 import { DatabaseManager } from '../manager/DatabaseManager';
+import { router } from '@kit.ArkUI';
 
 /**
  * AVPlayerManager和DatabaseManager使用示例
@@ -126,6 +127,18 @@ struct Index {
         .fontSize(24)
         .onClick(()=>{
           this.getHistory()
+        })
+
+      Button('历史记录页面')
+        .width(200)
+        .height(40)
+        .margin({ top: 20 })
+        .borderRadius(10)
+        .backgroundColor('#00BFFF')
+        .fontColor("FFFFFF")
+        .fontSize(24)
+        .onClick(()=>{
+          router.pushUrl({url: "pages/History"})
         })
 
       Text("历史记录："+this.history).fontSize(20)
