@@ -18,7 +18,6 @@ struct History {
   async playHistoryMusic(index: number) {
     let avPlayer = await AVPlayerManager.getInstance()
     await avPlayer.setMusicList(this.historyList.slice(index).concat(this.historyList.slice(0, index)))
-
   }
 
   build() {

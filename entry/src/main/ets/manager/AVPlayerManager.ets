@@ -156,6 +156,16 @@ export class AVPlayerManager{
     }
   }
 
+  /**
+   * 跳转到播放列表中指定位置的歌曲
+   */
+  async jumpTo(index: number) {
+    if (this.avPlayer && index >= 0 && index < this.musicList.length) {
+      this.currentMusicIndex = index
+      await this.loadListMusic()
+    }
+  }
+
 
   /**
    * 暂停播放音乐。可以通过调用continue函数继续播放音乐
@@ -372,6 +382,8 @@ export class AVPlayerManager{
   }
 
 
-
+  getMusicList() {
+    return this.musicList
+  }
 
 }

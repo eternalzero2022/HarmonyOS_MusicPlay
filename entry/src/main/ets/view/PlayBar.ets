@@ -5,6 +5,7 @@ import { DatabaseManager } from '../manager/DatabaseManager';
 import { router } from '@kit.ArkUI';
 import { Constants } from '../constants/Constants'
 
+
 @Component
 export struct PlayBar {
   @StorageProp('currentMusic') currentMusic: Music = EmptyMusic
@@ -12,6 +13,18 @@ export struct PlayBar {
   @StorageProp('currentStrategy') currentStrategy: MusicPlayStrategy = MusicPlayStrategy.SEQUENCE
   @StorageProp('currentTime') currentTime: number = 0
   @StorageProp('totalTime') totalTime: number = 1
+  @State listPopup: boolean = false
+
+  avPlayer: AVPlayerManager | null = null
+
+  async aboutToAppear() {
+    this.avPlayer = await AVPlayerManager.getInstance()
+  }
+
+  @Builder
+  listPopupBuilder() {
+    PlayingList({ currentMusic: this.currentMusic, currentState: this.currentState })
+  }
 
   async changeStrategy() {
     let avPlayer = await AVPlayerManager.getInstance()
@@ -25,28 +38,23 @@ export struct PlayBar {
   }
 
   async jumpToNextMusic() {
-    let avPlayer = await AVPlayerManager.getInstance()
-    await avPlayer.jumpToNextMusic()
+    await this.avPlayer?.jumpToNextMusic()
   }
 
   async jumpToPrevMusic() {
-    let avPlayer = await AVPlayerManager.getInstance()
-    await avPlayer.jumpToPrevMusic()
+    await this.avPlayer?.jumpToPrevMusic()
   }
 
   async pause() {
-    let avPlayer = await AVPlayerManager.getInstance()
-    await avPlayer.pause()
+    await this.avPlayer?.pause()
   }
 
   async continue() {
-    let avPlayer = await AVPlayerManager.getInstance()
-    await avPlayer.continue()
+    await this.avPlayer?.continue()
   }
 
   async seek(time: number) {
-    let avPlayer = await AVPlayerManager.getInstance()
-    await avPlayer.seekByTime(time)
+    await this.avPlayer?.seekByTime(time)
   }
 
   build() {
@@ -110,6 +118,18 @@ export struct PlayBar {
             })
 
           IconImage({ icon: $r('app.media.list') })
+            .onClick(() => {
+              this.listPopup = !this.listPopup
+            })
+            .bindPopup(this.listPopup, {
+              builder: this.listPopupBuilder,
+              placement: Placement.Bottom,
+              onStateChange: (e) => {
+                if (!e.isVisible) {
+                  this.listPopup = false
+                }
+              }
+            })
         }
         .layoutWeight(1)
         .justifyContent(FlexAlign.End)
@@ -124,7 +144,7 @@ export struct PlayBar {
         .width('95%')
         .height(4)
         .blockSize({ width: 6, height: 6 })
-        .onChange((value: number)=> {
+        .onChange((value: number) => {
           this.seek(value)
         })
     }
@@ -143,5 +163,111 @@ struct IconImage {
       .width(25)
       .height(25)
       .margin(5)
+  }
+}
+
+@Component
+struct PlayingList {
+  musicList: Music[] = []
+  @Prop currentMusic: Music = EmptyMusic
+  @Prop currentState: PlayState = PlayState.PAUSE
+
+  avPlayer: AVPlayerManager | null = null
+
+
+  async aboutToAppear() {
+    this.avPlayer = await AVPlayerManager.getInstance()
+    this.musicList = this.avPlayer.getMusicList()
+  }
+
+  build() {
+    Column() {
+      Text('当前播放列表')
+        .fontWeight(FontWeight.Bold)
+        .fontSize(16)
+        .width('90%')
+        .margin({ bottom: 10 })
+
+      List({ space: 8 }) {
+        ForEach(this.musicList, (music: Music, index: number) => {
+          ListItem() {
+            Row() {
+
+              if (music.musicName == this.currentMusic.musicName) {
+
+                if (this.currentState == PlayState.PAUSE) {
+                  Image($r("app.media.play1"))
+                    .width(20)
+                    .height(20)
+                    .onClick(() => {
+                      this.avPlayer?.continue()
+                    })
+
+                } else {
+                  Image($r("app.media.pause1"))
+                    .width(20)
+                    .height(20)
+                    .onClick(() => {
+                      this.avPlayer?.pause()
+                    })
+                }
+
+                Image(music.imageUrl == '' ? Constants.DEFAULT_MUSIC_IMAGE : music.imageUrl)
+                  .width(25)
+                  .height(25)
+                  .padding(2)
+                  .margin({ right: 5 })
+                  .borderRadius(5)
+                  .foregroundColor($r('app.media.playing'))
+
+                Text(music.musicName)
+                  .fontWeight(FontWeight.Bold)
+
+                Text(' · ')
+
+                Text(music.singer)
+                  .fontSize(14)
+                  .fontColor(Color.Gray)
+
+              } else {
+                Image(music.imageUrl == '' ? Constants.DEFAULT_MUSIC_IMAGE : music.imageUrl)
+                  .width(25)
+                  .height(25)
+                  .padding(2)
+                  .margin({ right: 5 })
+                  .borderRadius(5)
+
+                Text(music.musicName)
+
+                Text(' · ')
+
+                Text(music.singer)
+                  .fontSize(14)
+                  .fontColor(Color.Gray)
+              }
+            }
+            .onClick(() => {
+              this.avPlayer?.jumpTo(index)
+            })
+          }
+        })
+      }
+      .width('90%')
+      .divider({
+        strokeWidth: 1,
+        startMargin: 0,
+        endMargin: 20,
+        color: '#ffe9f0f0'
+      })
+    }
+    .padding({
+      left: 10,
+      right: 10,
+      top: 15,
+      bottom: 15
+    })
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+    .justifyContent(FlexAlign.Center)
   }
 }
