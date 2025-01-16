@@ -1,4 +1,4 @@
-import {userLogin, getUserInfo} from '../api/user'
+import {userLogin, getUserInfo, register} from '../api/user'
 import axios, { AxiosResponse } from '@ohos/axios'
 import { router } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
@@ -6,28 +6,23 @@ import { BusinessError } from '@kit.BasicServicesKit';
 @Entry
 @Component
 
-struct UserLogin {
+struct UserRegister {
   // 用户名和密码的绑定变量
   username: string = '';
   password: string = '';
 
-  async handleLogin() {
-    userLogin({username: this.username, password: this.password}).then((res:AxiosResponse) => {
+  async handleRegister(){
+    register({
+      username: this.username,
+      password: this.password
+    }).then((res:AxiosResponse) => {
       if (res.data.code === '200') {
-        // 登录成功
-        getUserInfo().then((res:AxiosResponse) => {
-          if (res.data.code === '200') {
-            //localStorage.setItem('Id', res.data.result.id);
-            AppStorage.setOrCreate<number>("Id",res.data.result.id)
-            console.error("Id 是",AppStorage.get('Id'))
-          }
-        });
-        router.pushUrl({url: "pages/Index"})
+
+        router.pushUrl({ url : 'pages/UserLogin' });
       } else if (res.data.code === '400') {
-        // 登录失败
         AlertDialog.show({
           title: "警告",
-          message: "用户名或密码错误",
+          message: "用户名已经存在",
           alignment: DialogAlignment.Center,
           confirm: {
             value: "确认",
@@ -39,23 +34,7 @@ struct UserLogin {
           }
         })
       }
-    })
-      .catch((error:BusinessError) => {
-        console.log(error.message);
-        AlertDialog.show({
-          title: "警告",
-          message: "用户名或密码错误",
-          alignment: DialogAlignment.Center,
-          confirm: {
-            value: "确认",
-            fontColor: Color.Black,
-            backgroundColor: "#aabbcc",
-            action: () => {
-              console.log("点击了")
-            }
-          }
-        })
-      });
+    });
   }
 
   build() {
@@ -65,7 +44,7 @@ struct UserLogin {
 
         Column() {
           RelativeContainer() {
-            Text('请登录')
+            Text('请注册')
               .fontSize(24)
               .fontWeight(FontWeight.Bold)
               .fontColor(Color.Red)
@@ -117,24 +96,24 @@ struct UserLogin {
           .backgroundColor(Color.White);
 
           Row(){
-            Button('登 录')
+            Button('注 册')
               .width('40%')
               .height(50)
               .backgroundColor(Color.Red)
               .fontSize(18)
               .fontColor(Color.White)
               .onClick(() => {
-                this.handleLogin();
+                this.handleRegister();
               })
               .margin({ top: 56 });
-            Button('去注册')
+            Button('去登录')
               .width('40%')
               .height(50)
               .backgroundColor(Color.Red)
               .fontSize(18)
               .fontColor(Color.White)
               .onClick(() => {
-                router.pushUrl({url: "pages/UserRegister"})
+                router.pushUrl({url: "pages/UserLogin"})
               })
               .margin({ top: 56 });
           }
