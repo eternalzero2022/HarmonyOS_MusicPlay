@@ -26,6 +26,17 @@ struct Index {
       Stack() {
         if (this.selectedTab === 'test') {
           Column() {
+            Button('登录')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(()=>{
+                router.pushUrl({url: "pages/UserLogin"})
+              })
             Button('播放音乐')
               .width(200)
               .height(40)
@@ -140,29 +151,21 @@ struct Index {
         }
         else if (this.selectedTab === 'home') {
           Column() {
-            Button('播放音乐')
-              .width(200)
-              .height(40)
-              .margin({ top: 20 })
-              .borderRadius(10)
-              .backgroundColor('#00BFFF')
-              .fontColor("FFFFFF")
-              .fontSize(24)
-              .onClick(() => {
-                this.setMusicList()
-              })
             Text('首页')
           }
         }
-
-        // 我的内容
+        else if (this.selectedTab === 'playlist') {
+          Column() {
+            Text('歌单')
+          }
+        }
         else if (this.selectedTab === 'my') {
           Column() {
             Text('我的')
           }
         }
       }
-      .height('85%') // 剩余空间
+      .height('85%')
 
 
       Column() {
@@ -181,6 +184,19 @@ struct Index {
                   this.selectedTab = 'home';
                 })
               Text('首页')
+            }
+            //歌单按钮
+            Column() {
+              Image(this.selectedTab==='playlist'?$r('app.media.playlistfill'):$r('app.media.playlist'))
+                .width(35)
+                .height(35)
+                .borderRadius(5)
+                .backgroundColor(this.selectedTab==='playlist'?Color.Black:'')
+                .objectFit(ImageFit.Auto)
+                .onClick(() => {
+                  this.selectedTab = 'playlist';
+                })
+              Text('歌单')
             }
             // 我的按钮
             Column() {
