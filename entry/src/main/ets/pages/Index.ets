@@ -4,6 +4,8 @@ import { Music, MusicPlayStrategy, PlayState } from '../viewmodel/MusicViewModel
 import { DatabaseManager } from '../manager/DatabaseManager';
 import { router } from '@kit.ArkUI';
 import { PlayBar } from '../view/PlayBar'
+import { MinePage } from '../pages/Mine'
+
 /**
  * AVPlayerManager和DatabaseManager使用示例
  */
@@ -161,18 +163,7 @@ struct Index {
         }
         else if (this.selectedTab === 'my') {
           Column() {
-            Text('我的')
-            Button('登录')
-              .width(200)
-              .height(40)
-              .margin({ top: 20 })
-              .borderRadius(10)
-              .backgroundColor('#00BFFF')
-              .fontColor("FFFFFF")
-              .fontSize(24)
-              .onClick(()=>{
-                router.pushUrl({url: "pages/UserLogin"})
-              })
+            MinePage()
           }
         }
       }

@@ -2,6 +2,7 @@ import {userLogin, getUserInfo} from '../api/user'
 import axios, { AxiosResponse } from '@ohos/axios'
 import { router } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { User } from '../viewmodel/UserModel'
 
 @Entry
 @Component
@@ -19,10 +20,11 @@ struct UserLogin {
           if (res.data.code === '200') {
             //localStorage.setItem('Id', res.data.result.id);
             AppStorage.setOrCreate<number>("Id",res.data.result.id)
+            AppStorage.setOrCreate<User>("user", res.data.result)
             console.error("Id 是",AppStorage.get('Id'))
           }
         });
-        router.pushUrl({url: "pages/Index"})
+        router.back()
       } else if (res.data.code === '400') {
         // 登录失败
         AlertDialog.show({
