@@ -63,7 +63,7 @@ export struct PlayBar {
         // 当前播放的音乐
         Row() {
           Image(this.currentMusic.imageUrl)
-            .height(40)
+            .width(40)
             .height(40)
             .margin(10)
             .borderRadius(5)
@@ -153,6 +153,7 @@ export struct PlayBar {
     }
     .width('100%')
     .height(60)
+    .backgroundColor(Color.White)
   }
 }
 
