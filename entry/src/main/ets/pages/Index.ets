@@ -23,98 +23,8 @@ struct Index {
 
   @State selectedTab:string = 'home';
 
-  @State recommendedSongs: Array<Music> = [{
-    id: 1,
-    musicName: '>ω<',
-    singer: '1',
-    musicUrl: 'https://musicplay-oss.oss-cn-hangzhou.aliyuncs.com/%E7%BE%BD%E7%BF%BC%E6%B7%B1%E8%93%9D%20-%20%CF%89.mp3',
-    imageUrl: ''
-  },{
-    id: 2,
-    musicName: 'I got smoke',
-    singer: '2',
-    musicUrl: 'https://musicplay-oss.oss-cn-hangzhou.aliyuncs.com/V%E5%9C%A8%E7%87%83%E7%83%A7%20-%20I%20Got%20Smoke.mp3',
-    imageUrl: ''
-  },{
-    id: 3,
-    musicName: 'title theme',
-    singer: '3',
-    musicUrl: 'https://musicplay-oss.oss-cn-hangzhou.aliyuncs.com/Ari%20Pulkkinen%20-%20Title%20Theme.mp3',
-    imageUrl: ''
-  },{
-    id: 4,
-    musicName: 'zood',
-    singer: '4',
-    musicUrl: 'https://musicplay-oss.oss-cn-hangzhou.aliyuncs.com/bbblckck%20-%20Zood.mp3',
-    imageUrl: ''
-  }]
-  @State recommendedPlaylists: Array<playList> = [{
-    id: 1,
-    listName: "string",
-    imageUrl: "",
-    creatorId: 1,
-    date: "string | null",
-    share: true,
-    rate: 4,
-    rateNum: 4,
-    musicIds: [1,2,3,4],
-    isFavorite: true
-  },{
-    id: 1,
-    listName: "string",
-    imageUrl: "",
-    creatorId: 1,
-    date: "string | null",
-    share: true,
-    rate: 4,
-    rateNum: 4,
-    musicIds: [1,2,3,4],
-    isFavorite: true
-  },{
-    id: 1,
-    listName: "string",
-    imageUrl: "",
-    creatorId: 1,
-    date: "string | null",
-    share: true,
-    rate: 4,
-    rateNum: 4,
-    musicIds: [1,2,3,4],
-    isFavorite: true
-  },{
-    id: 1,
-    listName: "string",
-    imageUrl: "",
-    creatorId: 1,
-    date: "string | null",
-    share: true,
-    rate: 4,
-    rateNum: 4,
-    musicIds: [1,2,3,4],
-    isFavorite: true
-  },{
-    id: 1,
-    listName: "string",
-    imageUrl: "",
-    creatorId: 1,
-    date: "string | null",
-    share: true,
-    rate: 4,
-    rateNum: 4,
-    musicIds: [1,2,3,4],
-    isFavorite: true
-  },{
-    id: 1,
-    listName: "string",
-    imageUrl: "",
-    creatorId: 1,
-    date: "string | null",
-    share: true,
-    rate: 4,
-    rateNum: 4,
-    musicIds: [1,2,3,4],
-    isFavorite: true
-  }]
+  @State recommendedSongs: Array<Music> = []
+  @State recommendedPlaylists: Array<playList> = []
 
   build() {
       Column() {
@@ -263,8 +173,7 @@ struct Index {
                       .objectFit(ImageFit.Cover)
                       .borderRadius(5)
                       .onClick(() => {
-                        // 点击封面跳转到歌曲详情或播放页面
-                        router.pushUrl({ url: "pages/MusicDetail", params: song })
+                        this.playSong(song)
                       })
                   })
                 }
@@ -303,7 +212,7 @@ struct Index {
                             // .backgroundColor(Color.Gray)
                             .alignItems(VerticalAlign.Center)
                             .onClick(() => {
-
+                              this.playSong(song)
                             })
 
                           }
@@ -317,7 +226,7 @@ struct Index {
                       })
                     }.margin({top:10})
                   } else {
-                    Text('暂无推荐歌曲')
+                    Text('获取推荐歌曲中...')
                       .fontSize(14)
                       .fontColor(Color.Gray)
                       .margin({ top: 10 })
@@ -344,7 +253,7 @@ struct Index {
                               .borderRadius(30)
                               .objectFit(ImageFit.Cover)
                               .onClick(() => {
-
+                                //TODO:在此处跳转到对应歌单页面
                               })
                             Text(playlist.listName)
                               .fontSize(12)
@@ -359,7 +268,7 @@ struct Index {
                     .scrollable(ScrollDirection.Horizontal)
 
                   } else {
-                    Text('暂无推荐歌单')
+                    Text('获取推荐歌单中...')
                       .fontSize(14)
                       .fontColor(Color.Gray)
                       .margin({ top: 10 })
@@ -515,6 +424,11 @@ struct Index {
     this.history ='\n'+ history.map((music)=>{
       return music.musicName
     }).join('\n')
+  }
+
+  async playSong(music:Music){
+    let avPlayer = await AVPlayerManager.getInstance()
+    await avPlayer.playSong(music)
   }
 
 

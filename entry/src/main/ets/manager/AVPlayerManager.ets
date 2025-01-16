@@ -245,6 +245,30 @@ export class AVPlayerManager{
   }
 
   /**
+   * 新增方法：开始播放指定的歌曲
+   * @param song 要播放的歌曲
+   */
+  async playSong(song: Music){
+    try {
+      // 检查歌曲是否在当前播放列表中
+      const index = this.musicList.findIndex(m => m.id === song.id)
+      if(index !== -1){
+        // 歌曲在播放列表中，设置当前索引并播放
+        this.currentMusicIndex = index
+      } else {
+        // 歌曲不在播放列表中，插入到列表首位
+        this.musicList.unshift(song)
+        this.currentMusicIndex = 0
+      }
+      await this.loadListMusic()
+    } catch (error) {
+      console.error('播放指定歌曲失败:', error)
+      // 可以添加用户提示或其他错误处理逻辑
+    }
+  }
+
+
+  /**
    * 初始化avplayer
    */
   private async init(){

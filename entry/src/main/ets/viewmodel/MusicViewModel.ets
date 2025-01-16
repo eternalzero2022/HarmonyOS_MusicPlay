@@ -11,6 +11,7 @@ export interface Music {
   imageUrl: string
 }
 
+
 /**
  * 音乐播放策略，分别为随机播放、顺序播放、单曲循环
  */
