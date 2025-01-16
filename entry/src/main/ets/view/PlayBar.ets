@@ -59,6 +59,8 @@ export struct PlayBar {
     Column() {
 
       Row() {
+
+        // 当前播放的音乐
         Row() {
           Image(this.currentMusic.imageUrl)
             .height(40)
@@ -81,7 +83,7 @@ export struct PlayBar {
         })
 
         Row() {
-
+          // 播放顺序策略图标
           Row() {
             if (this.currentStrategy == MusicPlayStrategy.SEQUENCE) {
               IconImage({ icon: $r('app.media.sequence') })
@@ -95,12 +97,12 @@ export struct PlayBar {
             this.changeStrategy()
           })
 
-
+          // 上一首
           IconImage({ icon: $r('app.media.last') })
             .onClick(() => {
               this.jumpToPrevMusic()
             })
-
+          // 暂停/继续
           if (this.currentState == PlayState.PAUSE) {
             IconImage({ icon: $r('app.media.playing') })
               .onClick(() => {
@@ -112,12 +114,12 @@ export struct PlayBar {
                 this.pause()
               })
           }
-
+          // 下一首
           IconImage({ icon: $r('app.media.next') })
             .onClick(() => {
               this.jumpToNextMusic()
             })
-
+          // 播放列表
           IconImage({ icon: $r('app.media.list') })
             .onClick(() => {
               this.listPopup = !this.listPopup
@@ -135,12 +137,12 @@ export struct PlayBar {
         .layoutWeight(1)
         .justifyContent(FlexAlign.End)
         .margin({ right: 20 })
-
       }
       .width('100%')
       .justifyContent(FlexAlign.Start)
       .alignItems(VerticalAlign.Center)
 
+      // 播放进度滑动条
       Slider({ value: this.currentTime, max: this.totalTime, style: SliderStyle.OutSet })
         .width('95%')
         .height(4)
@@ -189,77 +191,86 @@ struct PlayingList {
         .width('90%')
         .margin({ bottom: 10 })
 
-      List({ space: 8 }) {
-        ForEach(this.musicList, (music: Music, index: number) => {
-          ListItem() {
-            Row() {
+      if (this.musicList.length == 0) {
+        Text('暂无播放中的歌曲')
+          .fontColor(Color.Gray)
+          .alignSelf(ItemAlign.Center)
+          .fontSize(14)
+          .margin(20)
+      } else {
 
-              if (music.musicName == this.currentMusic.musicName) {
+        List({ space: 8 }) {
+          ForEach(this.musicList, (music: Music, index: number) => {
+            ListItem() {
+              Row() {
 
-                if (this.currentState == PlayState.PAUSE) {
-                  Image($r("app.media.play1"))
-                    .width(20)
-                    .height(20)
-                    .onClick(() => {
-                      this.avPlayer?.continue()
-                    })
+                if (music.id == this.currentMusic.id) {
+                  // 目前播放中的
+                  if (this.currentState == PlayState.PAUSE) {
+                    Image($r("app.media.play1"))
+                      .width(20)
+                      .height(20)
+                      .onClick(() => {
+                        this.avPlayer?.continue()
+                      })
+
+                  } else {
+                    Image($r("app.media.pause1"))
+                      .width(20)
+                      .height(20)
+                      .onClick(() => {
+                        this.avPlayer?.pause()
+                      })
+                  }
+
+                  Image(music.imageUrl == '' ? Constants.DEFAULT_MUSIC_IMAGE : music.imageUrl)
+                    .width(25)
+                    .height(25)
+                    .padding(2)
+                    .margin({ right: 5 })
+                    .borderRadius(5)
+                    .foregroundColor($r('app.media.playing'))
+
+                  Text(music.musicName)
+                    .fontWeight(FontWeight.Bold)
+
+                  Text(' · ')
+
+                  Text(music.singer)
+                    .fontSize(14)
+                    .fontColor(Color.Gray)
 
                 } else {
-                  Image($r("app.media.pause1"))
-                    .width(20)
-                    .height(20)
-                    .onClick(() => {
-                      this.avPlayer?.pause()
-                    })
+                  Image(music.imageUrl == '' ? Constants.DEFAULT_MUSIC_IMAGE : music.imageUrl)
+                    .width(25)
+                    .height(25)
+                    .padding(2)
+                    .margin({ right: 5 })
+                    .borderRadius(5)
+
+                  Text(music.musicName)
+
+                  Text(' · ')
+
+                  Text(music.singer)
+                    .fontSize(14)
+                    .fontColor(Color.Gray)
                 }
-
-                Image(music.imageUrl == '' ? Constants.DEFAULT_MUSIC_IMAGE : music.imageUrl)
-                  .width(25)
-                  .height(25)
-                  .padding(2)
-                  .margin({ right: 5 })
-                  .borderRadius(5)
-                  .foregroundColor($r('app.media.playing'))
-
-                Text(music.musicName)
-                  .fontWeight(FontWeight.Bold)
-
-                Text(' · ')
-
-                Text(music.singer)
-                  .fontSize(14)
-                  .fontColor(Color.Gray)
-
-              } else {
-                Image(music.imageUrl == '' ? Constants.DEFAULT_MUSIC_IMAGE : music.imageUrl)
-                  .width(25)
-                  .height(25)
-                  .padding(2)
-                  .margin({ right: 5 })
-                  .borderRadius(5)
-
-                Text(music.musicName)
-
-                Text(' · ')
-
-                Text(music.singer)
-                  .fontSize(14)
-                  .fontColor(Color.Gray)
               }
+              .onClick(() => {
+                this.avPlayer?.jumpTo(index)
+              })
             }
-            .onClick(() => {
-              this.avPlayer?.jumpTo(index)
-            })
-          }
+          })
+        }
+        .width('90%')
+        .divider({
+          strokeWidth: 1,
+          startMargin: 0,
+          endMargin: 20,
+          color: '#ffe9f0f0'
         })
       }
-      .width('90%')
-      .divider({
-        strokeWidth: 1,
-        startMargin: 0,
-        endMargin: 20,
-        color: '#ffe9f0f0'
-      })
     }
     .padding({
       left: 10,

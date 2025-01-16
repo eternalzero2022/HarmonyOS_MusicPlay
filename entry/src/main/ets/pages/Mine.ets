@@ -28,6 +28,8 @@ export struct MinePage {
             Column() {
               Text(this.user.username)
                 .fontSize(20)
+                .fontWeight(FontWeight.Bold)
+
               if (this.user.id != -1) {
                 Text('UID: ' + this.user.id)
                   .fontSize(12)

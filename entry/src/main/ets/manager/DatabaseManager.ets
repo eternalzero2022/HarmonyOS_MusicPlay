@@ -57,6 +57,19 @@ export class DatabaseManager {
       })
     })
   }
+
+  /**
+   * 删除指定id的历史记录。使用Taskpool机制实现多任务并发
+   * @param context 当前的Context，其它类中可以使用getContext(this)获取
+   */
+  static async deleteHistory(id: number, context: Context){
+    let task: taskpool.Task = new taskpool.Task(deleteMusicHistoryTask, id, context)
+    taskpool.execute(task).then(()=>{
+      console.info("deleteHistorySuccess")
+    }).catch((e:Error)=>{
+      console.error("deleteHistoryFailed, message: "+e.message)
+    })
+  }
 }
 
 
@@ -202,6 +215,42 @@ async function getAllHistoryTask(context: Context):Promise<Array<Music>>{
         return reject([])
       }
     });
+  })
+}
+
+/**
+ * 删除指定id的历史记录
+ * @param id 待删除的历史记录id
+ * @param context 当前的Context
+ * @returns Promise
+ */
+@Concurrent
+async function deleteMusicHistoryTask(id: number, context: Context): Promise<void>{
+  relationalStore.getRdbStore(context, STORE_CONFIG,(err,store)=>{
+    if(err){
+      console.error('获取关系数据库失败')
+      return
+    }
+    if(store.version === 0){//初始阶段，没有任何表
+      store.executeSql(SQL_CREATE_TABLE_MUSIC)
+      store.version = 1
+    }
+
+
+    //先删除已有的相同音乐id的数据
+    let deletePredicates = new relationalStore.RdbPredicates(SQL_TABLE_MUSIC_NAME)
+    deletePredicates.equalTo('MID', id)
+    if(store !== undefined){
+      (store as relationalStore.RdbStore).delete(deletePredicates,(err: BusinessError, rows:number)=>{
+        if(err){
+          console.error('删除存在的歌曲历史数据失败，错误码: '+err.code+'信息: '+err.message)
+          return
+        }else{
+          console.info('删除存在的歌曲历史数据成功，删除行数: '+rows)
+
+        }
+      })
+    }
   })
 }
 
