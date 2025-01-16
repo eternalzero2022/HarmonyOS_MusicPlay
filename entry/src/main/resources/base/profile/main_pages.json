@@ -4,6 +4,8 @@
     "pages/History",
     "pages/UserLogin",
     "pages/UserRegister",
-    "pages/Detail"
+    "pages/Detail",
+    "pages/StartAd",
+    "pages/WebView"
   ]
 }

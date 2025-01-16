@@ -1,6 +1,7 @@
 import {userLogin, getUserInfo, register} from '../api/user'
 import axios, { AxiosResponse } from '@ohos/axios'
-import { router } from '@kit.ArkUI';
+import router from '@ohos.router';
+import { promptAction } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 
 @Entry
@@ -17,8 +18,8 @@ struct UserRegister {
       password: this.password
     }).then((res:AxiosResponse) => {
       if (res.data.code === '200') {
-
-        router.pushUrl({ url : 'pages/UserLogin' });
+        promptAction.showToast({message:"注册成功"})
+        router.replaceUrl({ url : 'pages/UserLogin' });
       } else if (res.data.code === '400') {
         AlertDialog.show({
           title: "警告",
@@ -117,7 +118,7 @@ struct UserRegister {
               })
               .margin({ top: 56 });
           }
-          // 登录按钮
+
 
         }
         .height('100%')
