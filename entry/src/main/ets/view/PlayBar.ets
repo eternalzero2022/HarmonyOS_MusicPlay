@@ -79,7 +79,7 @@ export struct PlayBar {
         .layoutWeight(1)
         .align(Alignment.Start)
         .onClick(()=>{
-          router.pushUrl({url: "pages/Detail",params:this.currentMusic})
+          router.pushUrl({url: 'pages/Detail'})
         })
 
         Row() {
