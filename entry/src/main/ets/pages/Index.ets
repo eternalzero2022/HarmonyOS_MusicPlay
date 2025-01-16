@@ -24,7 +24,7 @@ struct Index {
 
       // 内容区域，根据 selectedTab 切换内容
       Stack() {
-        if (this.selectedTab === 'home') {
+        if (this.selectedTab === 'test') {
           Column() {
             Button('播放音乐')
               .width(200)
@@ -138,6 +138,11 @@ struct Index {
             Text(this.message).fontSize(20)
           }
         }
+        else if (this.selectedTab === 'home') {
+          Column() {
+            Text('首页')
+          }
+        }
 
         // 我的内容
         else if (this.selectedTab === 'my') {
@@ -154,29 +159,32 @@ struct Index {
           PlayBar()
         }
         Row() {
-          // 首页按钮
-          Button('首页')
-            .width('50%')
-            .height(60)
-            .backgroundColor(this.selectedTab === 'home' ? '#00BFFF' : '#D3D3D3')
-            .fontColor("FFFFFF")
-            .fontSize(24)
-            .onClick(() => {
-              this.selectedTab = 'home';
-            })
-
-          // 我的按钮
-          Button('我的')
-            .width('50%')
-            .height(60)
-            .backgroundColor(this.selectedTab === 'my' ? '#00BFFF' : '#D3D3D3')
-            .fontColor("FFFFFF")
-            .fontSize(24)
-            .onClick(() => {
-              this.selectedTab = 'my';
-            })
+          Flex({ direction: FlexDirection.Row,justifyContent: FlexAlign.SpaceAround }) {
+            // 首页按钮
+            Column() {
+              Image(this.selectedTab==='home'?$r('app.media.homefill'):$r('app.media.home'))
+                .width(40)
+                .height(40)
+                .objectFit(ImageFit.Auto)
+                .onClick(() => {
+                  this.selectedTab = 'home';
+                })
+              Text('首页')
+            }
+            // 我的按钮
+            Column() {
+              Image(this.selectedTab==='my'?$r('app.media.spacefill'):$r('app.media.space'))
+                .width(40)
+                .height(40)
+                .objectFit(ImageFit.Auto)
+                .onClick(() => {
+                  this.selectedTab = 'my';
+                })
+              Text('我的')
+            }
+          }
         }
-        .height('15%')
+        .height('10%')
         .width('100%')
       }
     }
