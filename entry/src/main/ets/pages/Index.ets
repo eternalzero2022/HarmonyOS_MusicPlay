@@ -5,8 +5,10 @@ import { DatabaseManager } from '../manager/DatabaseManager';
 import { router } from '@kit.ArkUI';
 import { PlayBar } from '../view/PlayBar'
 import { MinePage } from '../pages/Mine'
-import { playList } from '../api/playlist';
+import { getAllShareListIds, playList } from '../api/playlist';
 import { Constants } from '../constants/Constants';
+import { getAllMusic } from '../api/music';
+import { AxiosResponse } from '@ohos/axios';
 
 /**
  * AVPlayerManager和DatabaseManager使用示例
@@ -25,6 +27,68 @@ struct Index {
 
   @State recommendedSongs: Array<Music> = []
   @State recommendedPlaylists: Array<playList> = []
+
+  async aboutToAppear(): Promise<void> {
+    await this.fetchRecommendedContent()
+  }
+
+  /**
+   * 异步方法：依次请求所有音乐和所有共享歌单ID，并随机选择最多10个填充到推荐歌曲和推荐歌单中。
+   */
+  async fetchRecommendedContent() {
+    // 调用获取所有音乐的请求
+    console.error("?")
+    getAllMusic()
+      .then((res: AxiosResponse): void => {
+        if (res.data.code === '200') {
+          console.error(res.data.code + " 1")
+          const allMusic: Array<Music> = res.data.result; // 获取所有音乐数据
+
+          // 随机选择最多10个音乐
+          const selectedSongs: Array<Music> = this.selectRandomItems(allMusic, 10);
+          this.recommendedSongs = selectedSongs; // 更新推荐歌曲状态
+          getAllShareListIds().then((playlistResponse: AxiosResponse): void => {
+            if (playlistResponse.data.code === '200') {
+              console.error(res.data.code + " 2")
+              const allPlaylists: Array<playList> = playlistResponse.data.result; // 获取所有歌单数据
+
+              // 随机选择最多10个歌单
+              const selectedPlaylists: Array<playList> = this.selectRandomItems(allPlaylists, 10);
+              this.recommendedPlaylists = selectedPlaylists; // 更新推荐歌单状态
+            }
+          })
+        }else{
+          console.error(res.data.code + " 3")
+        }
+      })
+  }
+
+  /**
+   * 辅助方法：从给定数组中随机选择最多count个项目。
+   * 如果数组长度小于等于count，则返回整个数组。
+   * @param items 原始数组
+   * @param count 最大选择数量
+   * @returns 随机选择的项目数组
+   */
+  selectRandomItems<T>(items: Array<T>, count: number): Array<T> {
+    if (items.length <= count) {
+      return items;
+    }
+
+    const selectedItems: Array<T> = [];
+    const indices = new Set<number>(); // 用于存储已选择的索引，避免重复
+
+    while (selectedItems.length < count) {
+      const randomIndex = Math.floor(Math.random() * items.length);
+      if (!indices.has(randomIndex)) {
+        indices.add(randomIndex);
+        selectedItems.push(items[randomIndex]);
+      }
+    }
+
+    return selectedItems;
+  }
+
 
   build() {
       Column() {
