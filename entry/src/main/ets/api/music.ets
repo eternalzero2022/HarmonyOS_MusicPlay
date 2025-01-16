@@ -1,5 +1,5 @@
-import axios, { AxiosResponse } from '@ohos/axios'
-
+import  { axios} from "./request"
+import { AxiosResponse } from '@ohos/axios'
 import { MUSIC_MODULE } from './_prefix';
 
 export interface musicInfo {
