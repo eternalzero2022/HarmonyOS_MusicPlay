@@ -4,6 +4,8 @@ import { Music, MusicPlayStrategy, PlayState } from '../viewmodel/MusicViewModel
 import { DatabaseManager } from '../manager/DatabaseManager';
 import { router } from '@kit.ArkUI';
 import { PlayBar } from '../view/PlayBar'
+import { MinePage } from '../pages/Mine'
+
 /**
  * AVPlayerManager和DatabaseManager使用示例
  */
@@ -193,7 +195,7 @@ struct Index {
         }
         else if (this.selectedTab === 'my') {
           Column() {
-            Text('我的')
+            MinePage()
           }
         }
       }

@@ -6,7 +6,7 @@ import { Constants } from '../constants/Constants'
 
 @Entry
 @Component
-struct History {
+export struct History {
   @State historyList: Music[] = []
 
   aboutToAppear() {
@@ -24,14 +24,11 @@ struct History {
 
     Column() {
       Row() {
-        Image($r('app.media.back'))
-          .width(20)
-          .height(20)
-          .margin(10)
-          .onClick(() => {
-            router.back()
-          })
+
         Text('最近播放')
+          .fontSize(16)
+          .fontWeight(FontWeight.Medium)
+          .margin(15)
       }
       .width('100%')
       .justifyContent(FlexAlign.Start)
@@ -45,7 +42,7 @@ struct History {
               Constants.DEFAULT_MUSIC_IMAGE : history.imageUrl)
                 .height(40)
                 .height(40)
-                .margin(10)
+                .margin(15)
                 .borderRadius(5)
               Column() {
                 Text(history.musicName)
@@ -69,8 +66,8 @@ struct History {
       }
       .divider({
         strokeWidth: 1,
-        startMargin: 20,
-        endMargin: 20,
+        startMargin: 15,
+        endMargin: 15,
         color: '#ffe9f0f0'
       })
     }

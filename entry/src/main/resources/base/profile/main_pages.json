@@ -3,6 +3,7 @@
     "pages/Index",
     "pages/History",
     "pages/UserLogin",
+    "pages/UserRegister",
     "pages/Detail"
   ]
 }
