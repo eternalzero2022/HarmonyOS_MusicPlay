@@ -16,150 +16,189 @@ struct Index {
   
   @State history:string = ""
 
+  @State selectedTab:string = 'home';
+
   build() {
-    Column(){
+
+    Column() {
+
+      // 内容区域，根据 selectedTab 切换内容
+      Stack() {
+        if (this.selectedTab === 'test') {
+          Column() {
+            Button('播放音乐')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.setMusicList()
+              })
+
+            Button('下一首')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.jumpToNextMusic()
+              })
+
+            Button('上一首')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.jumpToPrevMusic()
+              })
+
+            Button('暂停')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.pause()
+              })
+
+            Button('继续播放')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.continue()
+              })
+
+            Button('设置回调')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.setTimeUpdateCallBack()
+              })
+
+            Button('设置播放策略')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.changeStrategy()
+              })
+            Text("当前策略：" + this.parseStrategy(this.strategy)).fontSize(20)
+
+            Button('音乐进度至95%')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.seekTo95Percent()
+              })
+
+            Button('获取历史记录')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.getHistory()
+              })
+
+            Text(this.message).fontSize(20)
+          }
+        }
+        else if (this.selectedTab === 'home') {
+          Column() {
+            Button('播放音乐')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.setMusicList()
+              })
+            Text('首页')
+          }
+        }
+
+        // 我的内容
+        else if (this.selectedTab === 'my') {
+          Column() {
+            Text('我的')
+          }
+        }
+      }
+      .height('85%') // 剩余空间
 
 
-      Button('播放音乐')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.setMusicList()
-        })
-      
-      Button('下一首')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.jumpToNextMusic()
-        })
-      
-      Button('上一首')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.jumpToPrevMusic()
-        })
-
-      Button('暂停')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.pause()
-        })
-
-      Button('继续播放')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.continue()
-        })
-
-      Button('设置回调')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.setTimeUpdateCallBack()
-        })
-      
-      Text(this.message).fontSize(20)
-      
-      Button('设置播放策略')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.changeStrategy()
-        })
-      Text("当前策略："+this.parseStrategy(this.strategy)).fontSize(20)
-
-      Button('音乐进度至95%')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.seekTo95Percent()
-        })
-
-      Button('获取历史记录')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          this.getHistory()
-        })
-
-      Button('历史记录页面')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          router.pushUrl({url: "pages/History"})
-        })
-      Button('登录')
-        .width(200)
-        .height(40)
-        .margin({ top: 20 })
-        .borderRadius(10)
-        .backgroundColor('#00BFFF')
-        .fontColor("FFFFFF")
-        .fontSize(24)
-        .onClick(()=>{
-          router.pushUrl({url: "pages/UserLogin"})
-        })
-      Blank()
-
-      PlayBar()
-
+      Column() {
+        Row(){
+          PlayBar()
+        }
+        Row() {
+          Flex({ direction: FlexDirection.Row,justifyContent: FlexAlign.SpaceAround }) {
+            // 首页按钮
+            Column() {
+              Image(this.selectedTab==='home'?$r('app.media.homefill'):$r('app.media.home'))
+                .width(35)
+                .height(35)
+                .objectFit(ImageFit.Auto)
+                .onClick(() => {
+                  this.selectedTab = 'home';
+                })
+              Text('首页')
+            }
+            // 我的按钮
+            Column() {
+              Image(this.selectedTab==='my'?$r('app.media.spacefill'):$r('app.media.space'))
+                .width(35)
+                .height(35)
+                .objectFit(ImageFit.Auto)
+                .onClick(() => {
+                  this.selectedTab = 'my';
+                })
+              Text('我的')
+            }
+          }
+        }
+        .height('10%')
+        .width('100%')
+      }
     }
-    .height('100%')
-    .width('100%')
   }
   
   async setMusicList(){
