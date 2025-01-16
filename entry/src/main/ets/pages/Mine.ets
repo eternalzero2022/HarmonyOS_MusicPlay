@@ -6,14 +6,13 @@ import { History } from '../pages/History'
 @Entry
 @Component
 export struct MinePage {
-  @StorageProp('user') user: User = EmptyUser
+  @StorageLink('user') user: User = EmptyUser
 
   aboutToAppear(): void {
     if (this.user.id == -1) {
-      router.pushUrl({ url: Constants.LOGIN_PAGE })
+      // router.pushUrl({ url: Constants.LOGIN_PAGE })
     }
   }
-
 
   build() {
     Scroll() {
@@ -29,33 +28,41 @@ export struct MinePage {
             Column() {
               Text(this.user.username)
                 .fontSize(20)
-              Text('UID: ' + this.user.id)
-                .fontSize(12)
-                .margin({ top: 4 })
+              if (this.user.id != -1) {
+                Text('UID: ' + this.user.id)
+                  .fontSize(12)
+                  .margin({ top: 4 })
+              }
             }
             .alignItems(HorizontalAlign.Start)
             .margin({ left: 24 })
           }
           .layoutWeight(1)
           .align(Alignment.Start)
+          .onClick(() => {
+            if (this.user.id == -1) {
+              router.pushUrl({ url: Constants.LOGIN_PAGE })
+            }
+          })
 
-          Row() {
-            Button('退出登录', { type: ButtonType.Capsule })
-              .width('60%')
-              .height(40)
-              .fontSize(16)
-              .fontColor(0xFA2A2D)
-              .fontWeight(FontWeight.Medium)
-              .backgroundColor(0xE5E8EA)
-              .onClick(() => {
-                router.pushUrl({ url: Constants.LOGIN_PAGE })
-              })
+          if (this.user.id != -1) {
+            Row() {
+              Button('退出登录', { type: ButtonType.Capsule })
+                .width('60%')
+                .height(40)
+                .fontSize(16)
+                .fontColor(0xFA2A2D)
+                .fontWeight(FontWeight.Medium)
+                .backgroundColor(0xE5E8EA)
+                .onClick(() => {
+                  this.user = EmptyUser
+                })
+            }
+            .width('30%')
+            .padding({ right: 10 })
+            .layoutWeight(1)
+            .justifyContent(FlexAlign.End)
           }
-          .width('30%')
-          .padding({right: 10})
-          .layoutWeight(1)
-          .justifyContent(FlexAlign.End)
-
 
         }
         .margin({ top: 24 })

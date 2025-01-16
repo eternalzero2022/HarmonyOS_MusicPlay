@@ -1,7 +1,5 @@
 import { AVPlayerManager } from "../manager/AVPlayerManager"
-import { taskpool } from '@kit.ArkTS'
 import { Music, MusicPlayStrategy, PlayState, EmptyMusic } from '../viewmodel/MusicViewModel';
-import { DatabaseManager } from '../manager/DatabaseManager';
 import { router } from '@kit.ArkUI';
 import { Constants } from '../constants/Constants'
 

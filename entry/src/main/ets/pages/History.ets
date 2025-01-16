@@ -1,6 +1,5 @@
-import { Music } from "../viewmodel/MusicViewModel"
 import { DatabaseManager } from "../manager/DatabaseManager"
-import { router } from '@kit.ArkUI';
+import { Music, PlayState, EmptyMusic } from '../viewmodel/MusicViewModel';
 import { AVPlayerManager } from "../manager/AVPlayerManager"
 import { Constants } from '../constants/Constants'
 
@@ -8,8 +7,12 @@ import { Constants } from '../constants/Constants'
 @Component
 export struct History {
   @State historyList: Music[] = []
+  @StorageProp('currentMusic') currentMusic: Music = EmptyMusic
+  @StorageProp('currentState') currentState: PlayState = PlayState.PAUSE
+  avPlayer: AVPlayerManager | null = null
 
-  aboutToAppear() {
+  async aboutToAppear() {
+    this.avPlayer = await AVPlayerManager.getInstance()
     DatabaseManager.getAllHistory(getContext(this)).then((historyList) => {
       this.historyList = historyList;
     });
@@ -26,8 +29,8 @@ export struct History {
       Row() {
 
         Text('最近播放')
-          .fontSize(16)
-          .fontWeight(FontWeight.Medium)
+          .fontSize(18)
+          .fontWeight(FontWeight.Bold)
           .margin(15)
       }
       .width('100%')
@@ -37,30 +40,41 @@ export struct History {
       List() {
         ForEach(this.historyList, (history: Music, index: number) => {
           ListItem() {
-            Row() {
-              Image(history.imageUrl === "" ?
-              Constants.DEFAULT_MUSIC_IMAGE : history.imageUrl)
-                .height(40)
-                .height(40)
-                .margin(15)
-                .borderRadius(5)
-              Column() {
-                Text(history.musicName)
-                Text(history.singer)
+
+            if (history.musicName == this.currentMusic.musicName) {
+
+              Row() {
+                if (this.currentState == PlayState.PAUSE) {
+                  Image($r("app.media.play1"))
+                    .width(40)
+                    .height(40)
+                    .margin({ left: 15 })
+                    .onClick(() => {
+                      this.avPlayer?.continue()
+                    })
+
+                } else {
+                  Image($r("app.media.pause1"))
+                    .width(40)
+                    .height(40)
+                    .margin({ left: 15 })
+                    .onClick(() => {
+                      this.avPlayer?.pause()
+                    })
+                }
+
+                MusicItem({ music: history })
+                  .onClick(() => {
+                    this.playHistoryMusic(index)
+                  })
               }
-              .alignItems(HorizontalAlign.Start)
+
+            } else {
+              MusicItem({ music: history })
+                .onClick(() => {
+                  this.playHistoryMusic(index)
+                })
             }
-            .width('100%')
-            .justifyContent(FlexAlign.Start)
-            // .height(40)
-            // .backgroundColor(Color.Gray)
-            .alignItems(VerticalAlign.Center)
-            .onClick(() => {
-
-              this.playHistoryMusic(index)
-
-            })
-
           }
         })
       }
@@ -71,5 +85,29 @@ export struct History {
         color: '#ffe9f0f0'
       })
     }
+  }
+}
+
+@Component
+struct MusicItem {
+  music: Music = EmptyMusic
+
+  build() {
+    Row() {
+      Image(this.music.imageUrl === "" ?
+      Constants.DEFAULT_MUSIC_IMAGE : this.music.imageUrl)
+        .height(40)
+        .height(40)
+        .margin(15)
+        .borderRadius(5)
+      Column() {
+        Text(this.music.musicName)
+        Text(this.music.singer)
+      }
+      .alignItems(HorizontalAlign.Start)
+    }
+    .width('100%')
+    .justifyContent(FlexAlign.Start)
+    .alignItems(VerticalAlign.Center)
   }
 }

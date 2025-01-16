@@ -12,7 +12,7 @@ export interface User {
 
 export const EmptyUser: User = {
   id: -1,
-  username: "未登录",
+  username: "立即登录 >",
   password: "",
   imageUrl: Constants.DEFAULT_HEAD_IMAGE,
   isManager: false,
