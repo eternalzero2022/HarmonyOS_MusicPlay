@@ -15,6 +15,32 @@ export interface playList {
   isFavorite: boolean | null;
 }
 
+export const EmptyPlayList:playList = {
+  id: 0,
+  listName: '',
+  imageUrl: '',
+  creatorId: null,
+  date: null,
+  share: false,
+  rate: 0,
+  rateNum: 0,
+  musicIds: [],
+  isFavorite: false
+}
+
+export const TestPlayList:playList = {
+  id: 0,
+  listName: 'test',
+  imageUrl: '',
+  creatorId: null,
+  date: null,
+  share: false,
+  rate: 0,
+  rateNum: 0,
+  musicIds: [1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3],
+  isFavorite: false
+}
+
 export interface musics {
   id: number;
   music_id: number | null;

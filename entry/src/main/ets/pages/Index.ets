@@ -9,6 +9,7 @@ import { getAllShareListIds, playList } from '../api/playlist';
 import { Constants } from '../constants/Constants';
 import { getAllMusic } from '../api/music';
 import { AxiosResponse } from '@ohos/axios';
+import { PlayListPage } from './PlayLists';
 
 /**
  * AVPlayerManager和DatabaseManager使用示例
@@ -349,7 +350,7 @@ struct Index {
             }.scrollBar(BarState.Off)
           } else if (this.selectedTab === 'playlist') {
             Column() {
-              Text('歌单')
+              PlayListPage()
             }
           } else if (this.selectedTab === 'my') {
             Column() {

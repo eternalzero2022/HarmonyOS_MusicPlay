@@ -6,6 +6,7 @@
     "pages/UserRegister",
     "pages/Detail",
     "pages/StartAd",
-    "pages/WebView"
+    "pages/WebView",
+    "pages/PlayListDetail"
   ]
 }

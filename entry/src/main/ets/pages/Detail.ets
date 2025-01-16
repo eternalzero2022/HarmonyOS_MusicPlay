@@ -81,22 +81,20 @@ struct Detail {
       Blank().height('5%')
 
       Row(){
-        Text(this.currentMusic.musicName)
-          .fontSize(50)
+        Column() {
+          Text(this.currentMusic.musicName)
+            .fontSize(50)
+
+          Text(this.currentMusic.singer)
+            .fontSize(20)
+        }
       }
-      .justifyContent(FlexAlign.Center)
+      .justifyContent(FlexAlign.SpaceAround)
       .width('100%')
-      .height('7%')
+      .height('10%')
 
       Blank().height('2%')
 
-      Row(){
-        Text(this.currentMusic.singer)
-          .fontSize(20)
-      }
-      .justifyContent(FlexAlign.Center)
-      .width('100%')
-      .height('3%')
 
       Row(){
         Text('歌词')
@@ -173,6 +171,11 @@ struct Detail {
             this.jumpToNextMusic()
           })
 
+        Image($r('app.media.addtoplaylist'))
+          .width(40)
+          .height(40)
+          .margin(5)
+
       }
       .layoutWeight(1)
       .justifyContent(FlexAlign.SpaceAround)
@@ -183,16 +186,5 @@ struct Detail {
   }
 }
 
-@Component
-struct IconImage {
-  icon: Resource = $r('app.media.last')
-
-  build() {
-    Image(this.icon)
-      .width(50)
-      .height(50)
-      .margin(5)
-  }
-}
 
 
