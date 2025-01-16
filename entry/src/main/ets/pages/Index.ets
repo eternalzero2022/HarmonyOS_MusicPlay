@@ -18,7 +18,7 @@ struct Index {
 
   build() {
     Column(){
-      PlayBar()
+
 
       Button('播放音乐')
         .width(200)
@@ -143,8 +143,9 @@ struct Index {
           router.pushUrl({url: "pages/History"})
         })
 
-      Text("历史记录："+this.history).fontSize(20)
+      Blank()
 
+      PlayBar()
 
     }
     .height('100%')
