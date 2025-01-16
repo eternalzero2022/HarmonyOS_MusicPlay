@@ -153,7 +153,39 @@ struct Index {
         }
         else if (this.selectedTab === 'home') {
           Column() {
-            Text('首页')
+            Button('登录')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(()=>{
+                router.pushUrl({url: "pages/UserLogin"})
+              })
+            Button('播放音乐')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.setMusicList()
+              })
+            Button('历史记录页面')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(()=>{
+                router.pushUrl({url: "pages/History"})
+              })
           }
         }
         else if (this.selectedTab === 'playlist') {
