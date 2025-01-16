@@ -140,6 +140,17 @@ struct Index {
         }
         else if (this.selectedTab === 'home') {
           Column() {
+            Button('播放音乐')
+              .width(200)
+              .height(40)
+              .margin({ top: 20 })
+              .borderRadius(10)
+              .backgroundColor('#00BFFF')
+              .fontColor("FFFFFF")
+              .fontSize(24)
+              .onClick(() => {
+                this.setMusicList()
+              })
             Text('首页')
           }
         }
@@ -163,8 +174,8 @@ struct Index {
             // 首页按钮
             Column() {
               Image(this.selectedTab==='home'?$r('app.media.homefill'):$r('app.media.home'))
-                .width(40)
-                .height(40)
+                .width(35)
+                .height(35)
                 .objectFit(ImageFit.Auto)
                 .onClick(() => {
                   this.selectedTab = 'home';
@@ -174,8 +185,8 @@ struct Index {
             // 我的按钮
             Column() {
               Image(this.selectedTab==='my'?$r('app.media.spacefill'):$r('app.media.space'))
-                .width(40)
-                .height(40)
+                .width(35)
+                .height(35)
                 .objectFit(ImageFit.Auto)
                 .onClick(() => {
                   this.selectedTab = 'my';
