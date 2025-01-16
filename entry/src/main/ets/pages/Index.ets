@@ -28,7 +28,11 @@ struct Index {
   @State recommendedSongs: Array<Music> = []
   @State recommendedPlaylists: Array<playList> = []
 
+
   async aboutToAppear(): Promise<void> {
+    if(!AppStorage.get("Token")){
+      router.replaceUrl({url : "pages/UserLogin"})
+    }
     await this.fetchRecommendedContent()
   }
 
