@@ -3,6 +3,7 @@ import axios, { AxiosResponse } from '@ohos/axios'
 import { router } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { User } from '../viewmodel/UserModel'
+import {promptAction} from '@kit.ArkUI';
 
 @Entry
 @Component
@@ -24,7 +25,8 @@ struct UserLogin {
             console.error("Id 是",AppStorage.get('Id'))
           }
         });
-        router.back()
+        promptAction.showToast({message:"登陆成功"})
+        router.replaceUrl({url : 'pages/Index'})
       } else if (res.data.code === '400') {
         // 登录失败
         AlertDialog.show({
