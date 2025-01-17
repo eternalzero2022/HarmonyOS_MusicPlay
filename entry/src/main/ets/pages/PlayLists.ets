@@ -130,10 +130,6 @@ export struct PlayListPage{
     .justifyContent(FlexAlign.Center)
   }
 
-  dialogController: CustomDialogController = new CustomDialogController({
-    builder: CustomDialogExample(),
-  })
-
   build() {
     Stack() {
 
@@ -221,7 +217,7 @@ export struct PlayListPage{
       .backgroundColor(Color.White)
       .position({x: '75%', y: '85%'})
       .onClick(() => {
-        this.dialogController.open()
+        router.pushUrl({url:'pages/CreatePlayList'})
       })
 
     }
@@ -266,49 +262,5 @@ struct playListItem{
   }
 }
 
-@CustomDialog
-struct CustomDialogExample {
-  controller: CustomDialogController = new CustomDialogController({
-    builder: CustomDialogExample({}),
-  })
 
-  build() {
-    Column() {
-      Blank().height('5%')
-      Row() {
-        Column() {
-          Text('取消')
-            .onClick(() => {
-              this.controller.close()
-            })
-        }
-        .alignItems(HorizontalAlign.Start)
-        Column(){
-          Text('创建歌单')
-            .fontSize(20)
-        }
-        .alignItems(HorizontalAlign.Center)
-        Column(){
-          Text('创建')
-            .onClick(() => {
-              this.controller.close()
-            })
-        }
-        .alignItems(HorizontalAlign.End)
-      }
-      .justifyContent(FlexAlign.SpaceBetween)
-      .width('100%')
-      .height('15%')
-
-      Row() {
-        TextInput({ placeholder: '请输入新建歌单名称' })
-          .width('100%')
-      }
-      .width('80%')
-      .height('80%')
-    }
-    .width('90%')
-    .height('20%')
-  }
-}
 
