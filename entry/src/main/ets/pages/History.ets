@@ -102,7 +102,7 @@ export struct History {
           strokeWidth: 1,
           startMargin: 15,
           endMargin: 15,
-          color: '#ffe9f0f0'
+          color: '#E2E3E5'
         })
         .height('73%')
       } else {
@@ -130,12 +130,18 @@ struct MusicItem {
         .borderRadius(5)
       Column() {
         Text(this.music.musicName)
-          .fontSize(16)
           .fontWeight(FontWeight.Medium)
           .margin({ bottom: 2 })
+          .fontSize(20)
+          .height(20)
+          .maxFontSize(20)
+          .minFontSize(10)
 
         Text(this.music.singer)
-          .fontSize(14)
+          .fontSize(15)
+          .height(15)
+          .maxFontSize(15)
+          .minFontSize(5)
           .fontColor(Color.Gray)
       }
       .alignItems(HorizontalAlign.Start)

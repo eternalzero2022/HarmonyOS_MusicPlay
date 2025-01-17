@@ -70,15 +70,18 @@ export struct PlayBar {
 
           Column() {
             Text(this.currentMusic.musicName)
+              .fontWeight(FontWeight.Medium)
+              .margin({ bottom: 2 })
               .fontSize(20)
               .height(20)
               .maxFontSize(20)
               .minFontSize(8)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
+
             Text(this.currentMusic.singer)
-              .fontSize(10)
-              .height(10)
-              .maxFontSize(10)
+              .fontSize(15)
+              .height(15)
+              .maxFontSize(15)
               .minFontSize(5)
               .fontColor(Color.Gray)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -162,8 +165,8 @@ export struct PlayBar {
         })
     }
     .width('100%')
-    .height(60)
-    .backgroundColor(Color.White)
+    .height(65)
+    .backgroundColor(0xf4f7f7)
   }
 }
 

@@ -113,7 +113,7 @@ struct CreatePlayList {
         Button('取消')
           .fontSize(20)
           .fontColor(Color.Red)
-          .backgroundColor(0xF1F3F5)
+          .backgroundColor(0xF2F3F5)
           .onClick(() => {
             router.back()
           })
