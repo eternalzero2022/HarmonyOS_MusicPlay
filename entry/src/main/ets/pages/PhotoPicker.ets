@@ -136,7 +136,7 @@ struct PhotoPicker {
         .onClick(() => {
         if (this.selectedUris.length > 0) {
           router.back({
-            url: 'pages/Index',
+            url: 'pages/CreatePlayList',
             params: {
               picUri: this.selectedUris[0]
             }
