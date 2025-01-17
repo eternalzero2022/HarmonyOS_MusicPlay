@@ -19,6 +19,24 @@ interface NoteItem extends ValuesBucket {
   userid: string
   text: string
 }
+
+
+@Component
+struct notfound{
+  build(){
+    Column() {
+      Image($r('app.media.planet'))
+        .width('80%')
+        .height('80%')
+
+      Text('哎呀，什么也没有找到呢...')
+        .width('80%')
+        .margin({ top: 10 })
+        .fontSize(20)
+    }
+  }
+}
+
 @Entry
 @Component
 export struct SearchPage {
@@ -32,7 +50,7 @@ export struct SearchPage {
   @StorageProp('currentState') currentState: PlayState = PlayState.PAUSE
   avPlayer: AVPlayerManager | null = null
   name: string = '';
-  search: string = '0';
+  search: number = 0;
   controller: SearchController = new SearchController()
 
   tableName: string = 'search_history'
@@ -91,7 +109,8 @@ export struct SearchPage {
   }
 
   async fetchRecommendedContent() {
-    this.search = '1'
+    this.search == 1
+    this.arr = []
     searchMusic(this.name).then((res:AxiosResponse) => {
       if (res.data.code === '200') {
         const allMusic: Array<Music> = res.data.result;
@@ -119,6 +138,7 @@ export struct SearchPage {
         } as NoteItem)
       }
     }
+    //AlertDialog.show({ message: '' + this.search})
   }
   // 左滑删除按钮
   @Builder
@@ -159,7 +179,7 @@ export struct SearchPage {
         .textFont({ size: 14, weight: 400 })
         .onSubmit((value: string) => {
           this.name = value;
-          this.search = '1'
+          this.search = 1
           this.fetchRecommendedContent();
         })
         .onChange((value: string) => {
@@ -168,44 +188,35 @@ export struct SearchPage {
         .margin(20)
 
 
+
       if(this.List.length < 1){
-        if(this.search == '1'){
-          Column() {
-            Image($r('app.media.planet'))
-              .width('80%')
-              .height('80%')
-
-            Text('哎呀，什么也没有找到呢...')
-              .width('80%')
-              .margin({ top: 10 })
-              .fontSize(20)
-          }
-        }else{
+        if(this.search == 0 && this.arr.length>0){
           List() {
-            ForEach(this.arr, (item: content ) => {
-              ListItem() {
-                Column(){
-                  Text(item.text.toString())
-                    .fontSize(12)
-                    .textAlign(TextAlign.Center)
-                    .size({height: 40, width: "100%"})
+          ForEach(this.arr, (item: content ) => {
+            ListItem() {
+              Column(){
+                Text(item.text.toString())
+                  .fontSize(12)
+                  .textAlign(TextAlign.Center)
+                  .size({height: 40, width: "100%"})
 
-                }.onClick(()=>{
-                  this.name = item.text.toString()
-                  this.search = '1'
-                  this.fetchRecommendedContent();
-                })
-              }.margin(6)
-              .borderRadius(10)
-              .backgroundColor("#FFFFFFFF")
-              .swipeAction({ end: this.deleteHistory(item.id)})
-            })
-          }
-          .width('100%')
-          .height('100%')
-          .backgroundColor("#FFDCDCDC")
+              }.onClick(()=>{
+                this.name = item.text.toString()
+                this.search = 1
+                this.fetchRecommendedContent();
+              })
+            }.margin(6)
+            .borderRadius(10)
+            .backgroundColor("#FFFFFFFF")
+            .swipeAction({ end: this.deleteHistory(item.id)})
+          })
         }
-
+        .width('100%')
+        .height('100%')
+        .backgroundColor("#FFDCDCDC")
+        } else {
+          notfound()
+        }
       }
 
       List() {
