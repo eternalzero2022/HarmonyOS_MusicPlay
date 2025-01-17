@@ -82,11 +82,12 @@ struct UserLogin {
 
   build() {
     Stack() {
-      Column() {
         // 顶部的欢迎文字
 
-        Column() {
+        Column(){
+          Blank().height('5%')
           RelativeContainer() {
+
             Text('请登录')
               .fontSize(24)
               .fontWeight(FontWeight.Bold)
@@ -98,7 +99,7 @@ struct UserLogin {
               .width('100%');
 
           }
-          .height('30%')
+          .height(50)
           .width('100%')
           .padding({ left: 32, right: 32 })
           .backgroundColor(Color.White);
@@ -140,7 +141,7 @@ struct UserLogin {
 
           Row(){
             Button('登 录')
-              .width('40%')
+              .width('30%')
               .height(50)
               .backgroundColor(Color.Red)
               .fontSize(18)
@@ -148,28 +149,27 @@ struct UserLogin {
               .onClick(() => {
                 this.handleLogin();
               })
-              .margin({ top: 56 });
+              .margin({ top: 20 });
             Button('去注册')
-              .width('40%')
+              .width('30%')
               .height(50)
-              .backgroundColor(Color.Red)
+              .backgroundColor(0xF1F3F5)
               .fontSize(18)
-              .fontColor(Color.White)
+              .fontColor(Color.Black)
               .onClick(() => {
                 router.pushUrl({url: "pages/UserRegister"})
               })
-              .margin({ top: 56 });
+              .margin({ top: 20 })
           }
-          // 登录按钮
+          .width('100%')
+          .justifyContent(FlexAlign.SpaceAround)
 
         }
-        .height('100%')
+        .height('80%')
         .width('100%')
         .backgroundColor(Color.White)
         .justifyContent(FlexAlign.SpaceBetween);
-
       }
-    }
   }
 
 }

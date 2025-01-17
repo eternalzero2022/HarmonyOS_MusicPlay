@@ -70,10 +70,20 @@ export struct PlayBar {
 
           Column() {
             Text(this.currentMusic.musicName)
+              .fontSize(20)
+              .height(20)
+              .maxFontSize(20)
+              .minFontSize(8)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
             Text(this.currentMusic.singer)
-              .fontSize(14)
+              .fontSize(10)
+              .height(10)
+              .maxFontSize(10)
+              .minFontSize(5)
               .fontColor(Color.Gray)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
           }
+          .width('70%')
           .alignItems(HorizontalAlign.Start)
         }
         .layoutWeight(1)
