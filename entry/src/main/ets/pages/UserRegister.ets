@@ -3,14 +3,15 @@ import axios, { AxiosResponse } from '@ohos/axios'
 import router from '@ohos.router';
 import { promptAction } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
-
+import { preferencesManager } from '../manager/PreferencesManager';
+import { preferences} from '@kit.ArkData';
 @Entry
 @Component
 
 struct UserRegister {
   // 用户名和密码的绑定变量
-  username: string = '';
-  password: string = '';
+  @State username: string = '';
+  @State password: string = '';
 
   async handleRegister(){
     register({
@@ -19,6 +20,8 @@ struct UserRegister {
     }).then((res:AxiosResponse) => {
       if (res.data.code === '200') {
         promptAction.showToast({message:"注册成功"})
+        preferencesManager.put("username", this.username)
+        preferencesManager.flush()
         router.replaceUrl({ url : 'pages/UserLogin' });
       } else if (res.data.code === '400') {
         AlertDialog.show({

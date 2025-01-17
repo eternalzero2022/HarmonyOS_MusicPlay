@@ -4,19 +4,37 @@ import { router } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { User } from '../viewmodel/UserModel'
 import {promptAction} from '@kit.ArkUI';
+import { preferencesManager } from '../manager/PreferencesManager';
+import { preferences} from '@kit.ArkData';
 
 @Entry
 @Component
 
 struct UserLogin {
   // 用户名和密码的绑定变量
-  username: string = '';
-  password: string = '';
+  @State username: string = '';
+  @State password: string = '';
+
+  async aboutToAppear(): Promise<void> {
+    const context = getContext(this) as Context;
+    await preferencesManager.init(context, 'myStore');
+
+    try {
+        await preferencesManager.get('username', '').then((data: preferences.ValueType) => {
+        console.info("Succeeded in getting value of 'startup'. Data: " + data);
+        this.username = data as string
+      })
+    } catch (err) {
+      console.error(`Failed to get preferences. Code: ${err.code}, Message: ${err.message}`);
+    }
+  }
 
   async handleLogin() {
     userLogin({username: this.username, password: this.password}).then((res:AxiosResponse) => {
       if (res.data.code === '200') {
         // 登录成功
+        preferencesManager.put("username", this.username)
+        preferencesManager.flush()
         getUserInfo().then((res:AxiosResponse) => {
           if (res.data.code === '200') {
             //localStorage.setItem('Id', res.data.result.id);
