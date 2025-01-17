@@ -8,6 +8,8 @@
     "pages/StartAd",
     "pages/WebView",
     "pages/PlayListDetail",
-    "pages/SearchPage"
+    "pages/SearchPage",
+    "pages/PhotoPicker",
+    "pages/CreatePlayList"
   ]
 }
