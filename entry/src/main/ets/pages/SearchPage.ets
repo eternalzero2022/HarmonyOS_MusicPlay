@@ -64,6 +64,10 @@ export struct SearchPage {
 
   async aboutToAppear() {
     this.avPlayer = await AVPlayerManager.getInstance()
+    this.historychange()
+  }
+
+  async historychange(){
     this.arr = []
     const store = await this.getStoreInstance()
     const predicates = new relationalStore.RdbPredicates(this.tableName)
@@ -79,6 +83,7 @@ export struct SearchPage {
       }
     }
   }
+
 
   async playHistoryMusic(index: number) {
     let avPlayer = await AVPlayerManager.getInstance()
@@ -138,7 +143,7 @@ export struct SearchPage {
       predicates.in('id', [index]) //  in      批量删除
       const affectedRows = await store.delete(predicates)
 
-      AlertDialog.show({ message: '受影响行数：' + affectedRows })
+      this.historychange()
     })
   }
   build() {
