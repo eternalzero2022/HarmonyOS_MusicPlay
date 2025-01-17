@@ -91,7 +91,7 @@ struct UserLogin {
             Text('请登录')
               .fontSize(24)
               .fontWeight(FontWeight.Bold)
-              .fontColor(Color.Red)
+              .fontColor(Color.Blue)
               .alignRules({
                 top: { anchor: '__container__', align: VerticalAlign.Top },
                 center: { anchor: '__container__', align: VerticalAlign.Center }
@@ -143,7 +143,7 @@ struct UserLogin {
             Button('登 录')
               .width('30%')
               .height(50)
-              .backgroundColor(Color.Red)
+              .backgroundColor(Color.Blue)
               .fontSize(18)
               .fontColor(Color.White)
               .onClick(() => {
