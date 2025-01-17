@@ -112,7 +112,7 @@ struct UserRegister {
           Button('去登录')
             .width('30%')
             .height(50)
-            .backgroundColor(0xF1F3F5)
+            .backgroundColor(0xF2F3F5)
             .fontSize(18)
             .fontColor(Color.Black)
             .onClick(() => {

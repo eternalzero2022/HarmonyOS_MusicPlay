@@ -142,8 +142,8 @@ struct PlayListDetail {
   @Builder itemHead() {
     Row() {
       Image($r('app.media.startplaylist'))
-        .height(40)
-        .width(50)
+        .height(30)
+        .width(40)
         .borderRadius(10)
         .margin(20)
       
@@ -317,9 +317,9 @@ struct musicItem{
           .minFontSize(10)
 
         Text(this.music.singer)
-          .fontSize(10)
-          .height(10)
-          .maxFontSize(10)
+          .fontSize(15)
+          .height(15)
+          .maxFontSize(15)
           .minFontSize(5)
           .fontColor(Color.Gray)
       }

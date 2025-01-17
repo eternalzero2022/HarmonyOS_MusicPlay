@@ -264,16 +264,19 @@ struct Index {
             }else{
             Scroll() {
               Column() {
+                TextInput({ placeholder: '搜索' })
+                  .onClick( ()=> {
+                    this.selectedTab = 'search';
+                  })
+                  .margin({ bottom: 5 })
+
                 Text('为您推荐')
                   .width('80%')
                   .margin({ top: 10 })
                   .fontSize(40)
                   .fontWeight(FontWeight.Bold)
 
-                TextInput({ placeholder: '搜索' })
-                  .onClick( ()=> {
-                    this.selectedTab = 'search';
-                  })
+
                 // 轮播图展示推荐歌曲的封面
                 Swiper(this.swiperController) {
                   ForEach(this.recommendedSongs, (song: Music) => {
@@ -309,11 +312,23 @@ struct Index {
                               Constants.DEFAULT_MUSIC_IMAGE : song.imageUrl)
                                 .width(40)
                                 .height(40)
-                                .margin(15)
+                                .margin({ left: 2, right: 15, top: 15, bottom: 15 })
                                 .borderRadius(5)
                               Column() {
                                 Text(song.musicName)
+                                  .fontWeight(FontWeight.Medium)
+                                  .margin({ bottom: 2 })
+                                  .fontSize(20)
+                                  .height(20)
+                                  .maxFontSize(20)
+                                  .minFontSize(10)
+
                                 Text(song.singer)
+                                  .fontSize(15)
+                                  .height(15)
+                                  .maxFontSize(15)
+                                  .minFontSize(5)
+                                  .fontColor(Color.Gray)
                               }
                               .alignItems(HorizontalAlign.Start)
                             }
@@ -332,9 +347,9 @@ struct Index {
                       }
                       .divider({
                         strokeWidth: 1,
-                        startMargin: 15,
-                        endMargin: 15,
-                        color: '#ffe9f0f0'
+                        startMargin: 5,
+                        endMargin: 5,
+                        color: 0xE2E3E5
                       })
                     }.margin({top:10})
                   } else {
@@ -393,6 +408,7 @@ struct Index {
               }
               .padding(25)
               .alignItems(HorizontalAlign.Start)
+              .backgroundColor(0xF2F3F5)
             }.scrollBar(BarState.Off)
             }
           } else if (this.selectedTab === 'playlist') {
@@ -422,40 +438,46 @@ struct Index {
               // 首页按钮
               Column() {
                 Image(this.selectedTab === 'home' ? $r('app.media.homefill') : $r('app.media.home'))
-                  .width(35)
-                  .height(35)
+                  .width(30)
+                  .height(30)
+                  .margin(5)
                   .objectFit(ImageFit.Auto)
-                  .onClick(() => {
-                    this.selectedTab = 'home';
-                  })
+
                 Text('首页')
               }
+              .onClick(() => {
+                this.selectedTab = 'home';
+              })
 
               //歌单按钮
               Column() {
                 Image(this.selectedTab === 'playlist' ? $r('app.media.playlistfill') : $r('app.media.playlist'))
-                  .width(35)
-                  .height(35)
+                  .width(30)
+                  .height(30)
+                  .margin(5)
                   .borderRadius(5)
                   .backgroundColor(this.selectedTab === 'playlist' ? Color.Black : '')
                   .objectFit(ImageFit.Auto)
-                  .onClick(() => {
-                    this.selectedTab = 'playlist';
-                  })
+
                 Text('歌单')
               }
+              .onClick(() => {
+                this.selectedTab = 'playlist';
+              })
 
               // 我的按钮
               Column() {
                 Image(this.selectedTab === 'my' ? $r('app.media.spacefill') : $r('app.media.space'))
-                  .width(35)
-                  .height(35)
+                  .width(30)
+                  .height(30)
+                  .margin(5)
                   .objectFit(ImageFit.Auto)
-                  .onClick(() => {
-                    this.selectedTab = 'my';
-                  })
+
                 Text('我的')
               }
+              .onClick(() => {
+                this.selectedTab = 'my';
+              })
             }
           }
           .height('10%')

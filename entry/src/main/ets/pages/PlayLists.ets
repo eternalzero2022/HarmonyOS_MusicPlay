@@ -129,7 +129,7 @@ export struct PlayListPage{
           }
         }
         .tabBar(this.tabBuilder('自建歌单', 0))
-        .backgroundColor(0xF1F3F5)
+        .backgroundColor(0xF2F3F5)
 
         TabContent() {
           Scroll() {
@@ -172,7 +172,7 @@ export struct PlayListPage{
           }
         }
         .tabBar(this.tabBuilder('收藏歌单', 1))
-        .backgroundColor(0xF1F3F5)
+        .backgroundColor(0xF2F3F5)
 
       }
       .onChange((index: number) => {

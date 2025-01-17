@@ -100,6 +100,6 @@ export struct MinePage {
       }
       .height('100%')
     }
-    .backgroundColor(0xF1F3F5)
+    .backgroundColor(0xF2F3F5)
   }
 }

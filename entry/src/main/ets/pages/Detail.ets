@@ -240,7 +240,7 @@ struct Detail {
           .bindPopup(this.listPopup, {
             builder: this.popupBuilder, // 气泡的内容
             placement:Placement.Bottom, // 气泡的弹出位置
-            popupColor:0xF1F3F5, // 气泡的背景色
+            popupColor:0xF2F3F5, // 气泡的背景色
             onStateChange: (e) => {
               if (!e.isVisible) {
                 this.listPopup = false
