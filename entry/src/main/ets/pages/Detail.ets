@@ -9,27 +9,37 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 @Entry
 @Component
 struct Detail {
+  // 从本地存储读取当前的音乐信息，默认为EmptyMusic
   @StorageProp('currentMusic') currentMusic: Music = EmptyMusic
+  // 从本地存储读取当前播放状态，默认为暂停状态
   @StorageProp('currentState') currentState: PlayState = PlayState.PAUSE
+  // 从本地存储读取当前播放策略，默认为顺序播放
   @StorageProp('currentStrategy') currentStrategy: MusicPlayStrategy = MusicPlayStrategy.SEQUENCE
+  // 从本地存储读取当前播放时间，默认为0
   @StorageProp('currentTime') currentTime: number = 0
+  // 从本地存储读取音乐总时长，默认为1
   @StorageProp('totalTime') totalTime: number = 1
+  // 控制歌单弹出框显示与否
   @State listPopup: boolean = false
+  // 存储歌单ID
   @State listIds: number[] = []
 
+  // 初始化播放器实例
   avPlayer: AVPlayerManager | null = null
 
-  addMusicToPlayList(musicid:number,listid:number){
-    addMusic({id:0,music_id:musicid,list_id:listid}).then((res:AxiosResponse)=>{
-      if(res.data.code==='200'){
-        this.listPopup = !this.listPopup
-      }
-      else{
-        hilog.error(0x00002,'MUSIC',`加入歌单失败 ${musicid} ${listid}`)
+  // 将音乐添加到指定歌单
+  addMusicToPlayList(musicid:number, listid:number) {
+    // 调用API将音乐添加到歌单
+    addMusic({id:0, music_id:musicid, list_id:listid}).then((res:AxiosResponse) => {
+      if(res.data.code === '200') {
+        this.listPopup = !this.listPopup  // 添加成功，关闭歌单弹框
+      } else {
+        hilog.error(0x00002, 'MUSIC', `加入歌单失败 ${musicid} ${listid}`)
       }
     })
   }
 
+  // 构建歌单选择弹框
   @Builder popupBuilder() {
     Column() {
       Blank().height('2%')
@@ -43,7 +53,8 @@ struct Detail {
       List() {
         ForEach(this.listIds, (item: number) => {
           ListItem() {
-            playListItem({ listid: item , musicid: this.currentMusic.id , add:()=>{this.addMusicToPlayList(this.currentMusic.id,item)}})
+            // 在每个歌单项中添加音乐
+            playListItem({ listid: item, musicid: this.currentMusic.id, add: () => { this.addMusicToPlayList(this.currentMusic.id, item) }})
           }
         })
       }.width('90%')
@@ -53,18 +64,19 @@ struct Detail {
     .justifyContent(FlexAlign.Start)
   }
 
+  // 页面即将显示时获取播放器实例和歌单ID
   async aboutToAppear() {
     this.avPlayer = await AVPlayerManager.getInstance()
-    getListIds().then((res:AxiosResponse)=>{
-      if(res.data.code==='200'){
-        this.listIds = res.data.result as number[]
-      }
-      else{
-        hilog.error(0x00002,'PLAYLIST','获取列表id失败')
+    getListIds().then((res:AxiosResponse) => {
+      if(res.data.code === '200') {
+        this.listIds = res.data.result as number[]  // 设置歌单ID
+      } else {
+        hilog.error(0x00002, 'PLAYLIST', '获取列表id失败')
       }
     })
   }
 
+  // 切换播放策略：顺序 -> 随机 -> 循环 -> 顺序
   async changeStrategy() {
     let avPlayer = await AVPlayerManager.getInstance()
     if (this.currentStrategy == MusicPlayStrategy.SEQUENCE) {
@@ -76,22 +88,27 @@ struct Detail {
     }
   }
 
+  // 跳转到下一首音乐
   async jumpToNextMusic() {
     await this.avPlayer?.jumpToNextMusic()
   }
 
+  // 跳转到上一首音乐
   async jumpToPrevMusic() {
     await this.avPlayer?.jumpToPrevMusic()
   }
 
+  // 暂停播放
   async pause() {
     await this.avPlayer?.pause()
   }
 
+  // 继续播放
   async continue() {
     await this.avPlayer?.continue()
   }
 
+  // 根据时间跳转
   async seek(time: number) {
     await this.avPlayer?.seekByTime(time)
   }

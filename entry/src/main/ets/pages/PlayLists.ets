@@ -8,72 +8,65 @@ import { router } from "@kit.ArkUI"
 @Entry
 @Component
 export struct PlayListPage{
+  // 声明状态变量，存储歌单的ID、收藏歌单的ID、当前选中的索引、歌单数据和收藏歌单数据
   @State listIds: number[] = []
   @State favoriteIds: number[] = []
   @State currentIndex: number = 0
   @State playlists: playList[] = []
   @State favplaylists: playList[] = []
 
+  // 页面即将显示时调用的函数
   aboutToAppear(){
-    getListIds().then(async (res:AxiosResponse)=>{
-      if(res.data.code==='200'){
-        this.listIds = res.data.result as number[]
+    // 请求获取歌单ID
+    getListIds().then(async (res: AxiosResponse) => {
+      if (res.data.code === '200') {
+        this.listIds = res.data.result as number[] // 将返回的歌单ID存储在listIds中
         if (this.listIds && this.listIds.length > 0) {
-          // 按顺序请求所有的音乐信息
+          // 按顺序获取所有歌单的信息
           for (const id of this.listIds) {
             try {
-              await getPlayListById(id).then((res:AxiosResponse)=>{
+              await getPlayListById(id).then((res: AxiosResponse) => {
                 if (res.data.code === '200') {
-                  this.playlists.push(res.data.result) // 添加到音乐列表中
+                  this.playlists.push(res.data.result) // 将获取到的歌单添加到playlists数组中
                 } else {
-                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
+                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`) // 如果获取歌单失败，记录错误日志
                 }
               })
             } catch (error) {
-              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
+              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error) // 捕获请求过程中的错误并记录
             }
           }
         }
-      }
-      else{
-        hilog.error(0x00002,'PLAYLIST','获取列表id失败')
+      } else {
+        hilog.error(0x00002, 'PLAYLIST', '获取列表id失败') // 如果获取歌单ID失败，记录错误日志
       }
     })
-    getFavoriteListIds().then(async (res:AxiosResponse)=>{
-      if(res.data.code==='200'){
-        this.favoriteIds = res.data.result as number[]
+
+    // 请求获取收藏的歌单ID
+    getFavoriteListIds().then(async (res: AxiosResponse) => {
+      if (res.data.code === '200') {
+        this.favoriteIds = res.data.result as number[] // 将返回的收藏歌单ID存储在favoriteIds中
         if (this.favoriteIds && this.favoriteIds.length > 0) {
-          // 按顺序请求所有的音乐信息
+          // 按顺序获取所有收藏歌单的信息
           for (const id of this.favoriteIds) {
             try {
-              await getPlayListById(id).then((res:AxiosResponse)=>{
+              await getPlayListById(id).then((res: AxiosResponse) => {
                 if (res.data.code === '200') {
-                  this.favplaylists.push(res.data.result) // 添加到音乐列表中
+                  this.favplaylists.push(res.data.result) // 将获取到的收藏歌单添加到favplaylists数组中
                 } else {
-                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
+                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`) // 如果获取收藏歌单失败，记录错误日志
                 }
               })
             } catch (error) {
-              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
+              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error) // 捕获请求过程中的错误并记录
             }
           }
         }
-      }
-      else{
-        hilog.error(0x00002,'PLAYLIST','获取收藏列表id失败')
+      } else {
+        hilog.error(0x00002, 'PLAYLIST', '获取收藏列表id失败') // 如果获取收藏歌单ID失败，记录错误日志
       }
     })
   }
-
-  // deletePlayList(id:number){
-  //   this.listIds = this.listIds.filter(id => id!==id)
-  //   this.playlists = this.playlists.filter(list => list.id !== id)
-  // }
-  //
-  // unFavoritePlayList(id:number){
-  //   this.favoriteIds = this.favoriteIds.filter(id => id!==id)
-  //   this.favplaylists = this.favplaylists.filter(list => list.id !== id)
-  // }
 
 
   //自定义tabbar渲染器

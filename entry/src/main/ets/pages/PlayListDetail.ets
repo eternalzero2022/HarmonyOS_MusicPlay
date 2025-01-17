@@ -16,44 +16,45 @@ import { EmptyUser, User } from '../viewmodel/UserModel';
 @Component
 struct PlayListDetail {
 
-  @StorageLink('user') user: User = EmptyUser
-  @State listid: number = (router.getParams() as Record<string,number>)['listId']
-  @State from: boolean = (router.getParams() as Record<string,boolean>)['from']
-  @State isFavorite: boolean | null = false
-  @State isCreator: boolean = false
-  @State typemessage: string = ''
-  @State playlist:playList = EmptyPlayList
-  @State musicList: Music[] = []
-  frash: boolean = false
+  @StorageLink('user') user: User = EmptyUser  // 从本地存储获取用户信息
+  @State listid: number = (router.getParams() as Record<string, number>)['listId']  // 获取歌单ID
+  @State from: boolean = (router.getParams() as Record<string, boolean>)['from']  // 判断页面来源
+  @State isFavorite: boolean | null = false  // 是否已收藏歌单
+  @State isCreator: boolean = false  // 是否为歌单创建者
+  @State typemessage: string = ''  // 类型信息，如：删除或收藏歌单
+  @State playlist: playList = EmptyPlayList  // 歌单数据
+  @State musicList: Music[] = []  // 歌单中的音乐列表
 
 
-  async playSong(music:Music){
+  // 播放歌曲
+  async playSong(music: Music) {
     let avPlayer = await AVPlayerManager.getInstance()
     await avPlayer.playSong(music)
   }
 
-  async aboutToAppear(){
-    await getPlayListById(this.listid).then(async (res:AxiosResponse)=>{
-      if(res.data.code==='200'){
+  // 页面即将显示时触发，获取歌单信息
+  async aboutToAppear() {
+    await getPlayListById(this.listid).then(async (res: AxiosResponse) => {
+      if (res.data.code === '200') {
         this.playlist = res.data.result
-        if(this.playlist.creatorId!==this.user.id){
+        // 判断是否为当前用户的歌单，设置收藏和删除状态
+        if (this.playlist.creatorId !== this.user.id) {
           this.isFavorite = this.playlist.isFavorite
-          if(this.isFavorite){
+          if (this.isFavorite) {
             this.typemessage = '取消收藏此歌单'
           }
-        }
-        else{
+        } else {
           this.isCreator = true
           this.typemessage = '删除此歌单'
         }
         const musicIds = this.playlist.musicIds
+        // 获取歌单内所有音乐信息
         if (musicIds && musicIds.length > 0) {
-          // 按顺序请求所有的音乐信息
           for (const id of musicIds) {
             try {
-              await getMusicById(id).then((res:AxiosResponse)=>{
+              await getMusicById(id).then((res: AxiosResponse) => {
                 if (res.data.code === '200') {
-                  this.musicList.push(res.data.result) // 添加到音乐列表中
+                  this.musicList.push(res.data.result)  // 添加音乐到音乐列表
                 } else {
                   hilog.error(0x00002, 'MUSIC', `获取音乐ID ${id} 失败`)
                 }
@@ -63,86 +64,82 @@ struct PlayListDetail {
             }
           }
         }
+      } else {
+        hilog.error(0x00002, 'PLAYLIST', '获取歌单失败')
       }
-      else{
-        hilog.error(0x00002,'PLAYLIST','获取歌单失败')
-      }
-
     })
   }
 
+  // 弹出确认框，控制删除或取消收藏操作
   dialogController: CustomDialogController = new CustomDialogController({
     builder: DeletePlayList({
-      type:this.typemessage,
-      delete:()=>{
-        this.isFavorite?this.unFavoritePlayList():this.deletePlayList()
+      type: this.typemessage,
+      delete: () => {
+        this.isFavorite ? this.unFavoritePlayList() : this.deletePlayList()
       }
     }),
   })
 
-  async deletePlayList(){
-    await deleteList(this.listid).then((res:AxiosResponse)=>{
-      if(res.data.code!=='200'){
-        hilog.error(0x00002,'PLAYLIST','删除歌单失败')
+  // 删除歌单
+  async deletePlayList() {
+    await deleteList(this.listid).then((res: AxiosResponse) => {
+      if (res.data.code !== '200') {
+        hilog.error(0x00002, 'PLAYLIST', '删除歌单失败')
         this.dialogController.close()
-      }
-      else{
-        this.frash = true
-        if(this.from){
-          router.pushUrl({url:'pages/Index',params:{index:1}})
-        }
-        else{
+      } else {
+        if (this.from) {
+          router.pushUrl({ url: 'pages/Index', params: { index: 1 } })
+        } else {
           router.back()
         }
       }
     })
   }
 
-  async unFavoritePlayList(){
-    await unFavorite(this.listid).then((res:AxiosResponse)=>{
-      if(res.data.code!=='200'){
-        hilog.error(0x00002,'PLAYLIST','取消收藏歌单失败')
+  // 取消收藏歌单
+  async unFavoritePlayList() {
+    await unFavorite(this.listid).then((res: AxiosResponse) => {
+      if (res.data.code !== '200') {
+        hilog.error(0x00002, 'PLAYLIST', '取消收藏歌单失败')
         this.dialogController.close()
-      }
-      else{
+      } else {
         this.isFavorite = false
-        this.frash = true
       }
     })
   }
 
-  async favoritePlayList(){
-    await favorite(this.listid).then((res:AxiosResponse)=>{
-      if(res.data.code!=='200'){
-        hilog.error(0x00002,'PLAYLIST','收藏歌单失败')
-      }
-      else{
+  // 收藏歌单
+  async favoritePlayList() {
+    await favorite(this.listid).then((res: AxiosResponse) => {
+      if (res.data.code !== '200') {
+        hilog.error(0x00002, 'PLAYLIST', '收藏歌单失败')
+      } else {
         this.isFavorite = true
-        this.frash = true
         this.typemessage = '取消收藏此歌单'
       }
     })
   }
 
-  async deleteMusic(deleid:number){
-    await removeMusic({ id:0,music_id:deleid,list_id: this.listid}).then((res:AxiosResponse)=>{
-      if(res.data.code!=='200'){
-        hilog.error(0x00002,'PLAYLIST','删除歌曲失败')
-      }
-      else{
+  // 删除歌曲
+  async deleteMusic(deleid: number) {
+    await removeMusic({ id: 0, music_id: deleid, list_id: this.listid }).then((res: AxiosResponse) => {
+      if (res.data.code !== '200') {
+        hilog.error(0x00002, 'PLAYLIST', '删除歌曲失败')
+      } else {
         this.musicList = this.musicList.filter(music => music.id !== deleid)
-        this.playlist.musicIds = this.playlist.musicIds.filter(id => id!==deleid)
+        this.playlist.musicIds = this.playlist.musicIds.filter(id => id !== deleid)
       }
     })
   }
 
-  async setMusicList(){
+  // 设置播放列表
+  async setMusicList() {
     let avPlayer = await AVPlayerManager.getInstance()
     await avPlayer.setMusicList(this.musicList)
   }
 
+  // 列表头部组件，包含 "全部播放" 按钮
   @Builder itemHead() {
-    // 列表分组的头部组件
     Row() {
       Image($r('app.media.startplaylist'))
         .height(40)
@@ -177,6 +174,7 @@ struct PlayListDetail {
             }
           })
 
+        // 删除按钮，仅在歌单创建者时可见
         if(this.isCreator) {
           Image($r('app.media.delete'))
             .width(30)
@@ -206,6 +204,8 @@ struct PlayListDetail {
               })
           }
         }
+
+
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
@@ -235,6 +235,7 @@ struct PlayListDetail {
           }
         }
 
+        // 如果没有音乐，显示暂无歌曲
         if(this.musicList.length===0){
           ListItem(){
             Row(){
@@ -265,9 +266,12 @@ struct PlayListDetail {
             })
           }
         }
+
+
       }
       .height('85%')
       .sticky(StickyStyle.Header)
+
 
       PlayBar()
     }
@@ -296,6 +300,7 @@ struct musicItem{
 
 
   build() {
+
     Row(){
       Column(){
         Text(this.index+'')
@@ -304,7 +309,6 @@ struct musicItem{
       .width('20%')
 
       Column(){
-
         Text(this.music.musicName)
           .fontSize(20)
           .height(20)
@@ -321,6 +325,7 @@ struct musicItem{
       .alignItems(HorizontalAlign.Start)
       .width('65%')
 
+      //歌曲编辑操作仅对创建者可见
       Column() {
         if(this.isCreator) {
           Image($r('app.media.remove'))
@@ -330,8 +335,8 @@ struct musicItem{
               this.dialogController.open()
             })
         }
-      }
-       .width('20%')
+      }.width('20%')
+
     }
     .justifyContent(FlexAlign.SpaceBetween)
     .width('100%')
