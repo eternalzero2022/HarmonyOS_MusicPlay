@@ -101,6 +101,17 @@ export struct PlayListPage{
                   })
                 }
               }
+              else if((!AppStorage.get("Id")) || AppStorage.get("Id")=== -1){
+                Column(){
+                  Text('请先登录')
+                    .fontColor(Color.Gray)
+                    .fontSize(50)
+                }
+                .alignItems(HorizontalAlign.Center)
+                .justifyContent(FlexAlign.Center)
+                .width('100%')
+                .height('80%')
+              }
               else{
                 Column(){
                   Text('暂无歌单')
@@ -132,6 +143,17 @@ export struct PlayListPage{
                     }
                   })
                 }
+              }
+              else if((!AppStorage.get("Id")) || AppStorage.get("Id")=== -1){
+                Column(){
+                  Text('请先登录')
+                    .fontColor(Color.Gray)
+                    .fontSize(50)
+                }
+                .alignItems(HorizontalAlign.Center)
+                .justifyContent(FlexAlign.Center)
+                .width('100%')
+                .height('80%')
               }
               else{
                 Column(){

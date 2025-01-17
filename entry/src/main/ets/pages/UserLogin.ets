@@ -30,12 +30,12 @@ struct UserLogin {
   }
 
   async handleLogin() {
-    userLogin({username: this.username, password: this.password}).then((res:AxiosResponse) => {
+    userLogin({username: this.username, password: this.password}).then(async (res:AxiosResponse) => {
       if (res.data.code === '200') {
         // 登录成功
         preferencesManager.put("username", this.username)
         preferencesManager.flush()
-        getUserInfo().then((res:AxiosResponse) => {
+        await getUserInfo().then((res:AxiosResponse) => {
           if (res.data.code === '200') {
             //localStorage.setItem('Id', res.data.result.id);
             AppStorage.setOrCreate<number>("Id",res.data.result.id)

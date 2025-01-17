@@ -57,6 +57,17 @@ export class AVPlayerManager{
     }
   }
 
+  public clear(){
+    AppStorage.setOrCreate('currentMusic', EmptyMusic)
+    AppStorage.setOrCreate('currentState', PlayState.PAUSE)
+    AppStorage.setOrCreate('currentStrategy', MusicPlayStrategy.SEQUENCE)
+    AppStorage.setOrCreate('currentTime', 0)
+    AppStorage.setOrCreate('totalTime', 1)
+    this.musicList = []
+    this.time = 0
+    this.avPlayer?.reset()
+  }
+
   public static async getInstance(): Promise<AVPlayerManager>{
     if(!AVPlayerManager.instance){
       console.info("即将创建实例")

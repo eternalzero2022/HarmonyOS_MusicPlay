@@ -12,6 +12,7 @@ import { AxiosResponse } from '@ohos/axios';
 import { PlayListPage } from './PlayLists';
 import { SearchPage } from '../pages/SearchPage'
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import text from '@ohos.graphics.text';
 
 /**
  * AVPlayerManager和DatabaseManager使用示例
@@ -249,6 +250,18 @@ struct Index {
               Text(this.message).fontSize(20)
             }
           } else if (this.selectedTab === 'home') {
+            if((!AppStorage.get("Id")) || AppStorage.get("Id")=== -1 ){
+              Column(){
+                Text('请先登录')
+                  .fontColor(Color.Gray)
+                  .fontSize(50)
+              }
+              .alignItems(HorizontalAlign.Center)
+              .justifyContent(FlexAlign.Center)
+              .width('100%')
+              .height('80%')
+
+            }else{
             Scroll() {
               Column() {
                 Text('为您推荐')
@@ -381,6 +394,7 @@ struct Index {
               .padding(25)
               .alignItems(HorizontalAlign.Start)
             }.scrollBar(BarState.Off)
+            }
           } else if (this.selectedTab === 'playlist') {
             Column(){
               PlayListPage()

@@ -2,6 +2,7 @@ import { User, EmptyUser } from '../viewmodel/UserModel'
 import { router } from '@kit.ArkUI'
 import { Constants } from '../constants/Constants'
 import { History } from '../pages/History'
+import { AVPlayerManager } from '../manager/AVPlayerManager'
 
 @Entry
 @Component
@@ -12,6 +13,15 @@ export struct MinePage {
     if (this.user.id == -1) {
       // router.pushUrl({ url: Constants.LOGIN_PAGE })
     }
+  }
+
+  async reset(){
+    this.user = EmptyUser
+    AVPlayerManager.getInstance().then((Manager: AVPlayerManager)=>{
+      Manager.clear()
+    })
+    AppStorage.setOrCreate<number>("Id",-1)
+    AppStorage.setOrCreate<string>("Token","")
   }
 
   build() {
@@ -57,7 +67,7 @@ export struct MinePage {
                 .fontWeight(FontWeight.Medium)
                 .backgroundColor(0xE5E8EA)
                 .onClick(() => {
-                  this.user = EmptyUser
+                  this.reset()
                 })
             }
             .width('30%')
