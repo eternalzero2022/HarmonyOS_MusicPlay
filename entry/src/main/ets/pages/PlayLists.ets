@@ -182,15 +182,15 @@ export struct PlayListPage{
 
       Button({ type: ButtonType.Circle, stateEffect: false }){
         Image($r('app.media.add'))
-          .width(40)
-          .height(40)
+          .width(25)
+          .height(25)
       }
       .borderStyle(BorderStyle.Solid)
       .borderWidth(2)
-      .width(70)
-      .height(70)
+      .width(50)
+      .height(50)
       .backgroundColor(Color.White)
-      .position({x: '75%', y: '85%'})
+      .position({x: '85%', y: '90%'})
       .onClick(() => {
         router.pushUrl({url:'pages/CreatePlayList'})
       })

@@ -218,6 +218,7 @@ struct PlayListDetail {
                 .width(130)
                 .height(130)
                 .margin(20)
+                .borderRadius(20)
 
               Column() {
                 Row() {

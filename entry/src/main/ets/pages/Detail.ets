@@ -168,6 +168,7 @@ struct Detail {
             this.seek(value)
           })
       }
+      .justifyContent(FlexAlign.SpaceAround)
       .width('100%')
 
       Blank().height('5%')
@@ -250,7 +251,6 @@ struct Detail {
       }
       .layoutWeight(1)
       .justifyContent(FlexAlign.SpaceAround)
-      .margin({ right: 20 })
       .width('100%')
       .height('10%')
     }
