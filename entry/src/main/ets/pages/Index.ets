@@ -5,12 +5,14 @@ import { DatabaseManager } from '../manager/DatabaseManager';
 import { router } from '@kit.ArkUI';
 import { PlayBar } from '../view/PlayBar'
 import { MinePage } from '../pages/Mine'
-import { getAllShareListIds, playList } from '../api/playlist';
+import { getAllShareListIds, getPlayListById, playList } from '../api/playlist';
 import { Constants } from '../constants/Constants';
 import { getAllMusic } from '../api/music';
 import { AxiosResponse } from '@ohos/axios';
 import { PlayListPage } from './PlayLists';
 import { SearchPage } from '../pages/SearchPage'
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
 /**
  * AVPlayerManager和DatabaseManager使用示例
  */
@@ -26,8 +28,8 @@ struct Index {
 
   @State selectedTab:string = 'home';
 
-  @State recommendedSongs: Array<Music> = []
-  @State recommendedPlaylists: Array<playList> = []
+  @State recommendedSongs: Music[] = []
+  @State recommendedPlaylists:playList[] = []
 
 
   async aboutToAppear(): Promise<void> {
@@ -52,14 +54,35 @@ struct Index {
           // 随机选择最多10个音乐
           const selectedSongs: Array<Music> = this.selectRandomItems(allMusic, 10);
           this.recommendedSongs = selectedSongs; // 更新推荐歌曲状态
-          getAllShareListIds().then((playlistResponse: AxiosResponse): void => {
+          hilog.error(0x00002,'MUSIC',`${JSON.stringify(this.recommendedSongs)}`)
+          getAllShareListIds().then(async (playlistResponse: AxiosResponse): Promise<void> => {
             if (playlistResponse.data.code === '200') {
               console.error(res.data.code + " 2")
-              const allPlaylists: Array<playList> = playlistResponse.data.result; // 获取所有歌单数据
+              const listids: number[] = playlistResponse.data.result; // 获取所有歌单数据
+              const allPlayList: playList[] = []
+
+              if (listids && listids.length > 0) {
+                // 按顺序请求所有的音乐信息
+                for (const id of listids) {
+                  try {
+                    await getPlayListById(id).then((res:AxiosResponse)=>{
+                      if (res.data.code === '200') {
+                        allPlayList.push(res.data.result) // 添加到音乐列表中
+                      } else {
+                        hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
+                      }
+                    })
+                  } catch (error) {
+                    hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
+                  }
+                }
+              }
 
               // 随机选择最多10个歌单
-              const selectedPlaylists: Array<playList> = this.selectRandomItems(allPlaylists, 10);
+              const selectedPlaylists: Array<playList> = this.selectRandomItems(allPlayList, 10);
               this.recommendedPlaylists = selectedPlaylists; // 更新推荐歌单状态
+
+              hilog.error(0x00002,'PLAYLIST',`${JSON.stringify(this.recommendedPlaylists)}`)
             }
           })
         }else{
@@ -228,10 +251,11 @@ struct Index {
           } else if (this.selectedTab === 'home') {
             Scroll() {
               Column() {
-                Text('为你推荐')
+                Text('为您推荐')
                   .width('80%')
                   .margin({ top: 10 })
-                  .fontSize(45)
+                  .fontSize(40)
+                  .fontWeight(FontWeight.Bold)
 
                 TextInput({ placeholder: '搜索' })
                   .onClick( ()=> {
@@ -287,6 +311,7 @@ struct Index {
                             .alignItems(VerticalAlign.Center)
                             .onClick(() => {
                               this.playSong(song)
+                              router.pushUrl({url: 'pages/Detail'})
                             })
 
                           }
@@ -327,7 +352,10 @@ struct Index {
                               .borderRadius(30)
                               .objectFit(ImageFit.Cover)
                               .onClick(() => {
-                                //TODO:在此处跳转到对应歌单页面
+                                router.pushUrl({
+                                  url:'pages/PlayListDetail',
+                                  params: { listId : playlist.id }
+                                })
                               })
                             Text(playlist.listName)
                               .fontSize(12)
@@ -354,7 +382,7 @@ struct Index {
               .alignItems(HorizontalAlign.Start)
             }.scrollBar(BarState.Off)
           } else if (this.selectedTab === 'playlist') {
-            Column() {
+            Column(){
               PlayListPage()
             }
           } else if (this.selectedTab === 'my') {

@@ -1,23 +1,66 @@
 import { AxiosResponse } from '@ohos/axios';
-import { deleteList, EmptyPlayList, getPlayListById, playList, removeMusic, TestPlayList } from '../api/playlist';
+import { deleteList, EmptyPlayList,
+  favorite,
+  getPlayListById, playList, removeMusic, TestPlayList,
+  unFavorite } from '../api/playlist';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { router } from '@kit.ArkUI';
 import { Constants } from '../constants/Constants';
 import { EmptyMusic, Music } from '../viewmodel/MusicViewModel';
 import { getMusicById } from '../api/music';
 import { AVPlayerManager } from '../manager/AVPlayerManager';
+import { PlayBar } from '../view/PlayBar';
+import { EmptyUser, User } from '../viewmodel/UserModel';
 
 @Entry
 @Component
 struct PlayListDetail {
 
+  @StorageLink('user') user: User = EmptyUser
   @State listid: number = (router.getParams() as Record<string,number>)['listId']
-  playlist:playList = TestPlayList
+  @State isFavorite: boolean | null = false
+  @State isCreator: boolean = false
+  @State typemessage: string = ''
+  @State playlist:playList = EmptyPlayList
+  @State musicList: Music[] = []
 
-  async aboutToAppear(){
-    await getPlayListById(this.listid).then((res:AxiosResponse)=>{
+
+  async playSong(music:Music){
+    let avPlayer = await AVPlayerManager.getInstance()
+    await avPlayer.playSong(music)
+  }
+
+  async onPageShow(){
+    await getPlayListById(this.listid).then(async (res:AxiosResponse)=>{
       if(res.data.code==='200'){
         this.playlist = res.data.result
+        if(this.playlist.creatorId!==this.user.id){
+          this.isFavorite = this.playlist.isFavorite
+          if(this.isFavorite){
+            this.typemessage = '取消收藏此歌单'
+          }
+        }
+        else{
+          this.isCreator = true
+          this.typemessage = '删除此歌单'
+        }
+        const musicIds = this.playlist.musicIds
+        if (musicIds && musicIds.length > 0) {
+          // 按顺序请求所有的音乐信息
+          for (const id of musicIds) {
+            try {
+              await getMusicById(id).then((res:AxiosResponse)=>{
+                if (res.data.code === '200') {
+                  this.musicList.push(res.data.result) // 添加到音乐列表中
+                } else {
+                  hilog.error(0x00002, 'MUSIC', `获取音乐ID ${id} 失败`)
+                }
+              })
+            } catch (error) {
+              hilog.error(0x00002, 'MUSIC', `请求音乐ID ${id} 发生错误`, error)
+            }
+          }
+        }
       }
       else{
         hilog.error(0x00002,'PLAYLIST','获取歌单失败')
@@ -28,10 +71,9 @@ struct PlayListDetail {
 
   dialogController: CustomDialogController = new CustomDialogController({
     builder: DeletePlayList({
-      type:'歌单',
+      type:this.typemessage,
       delete:()=>{
-        router.back()
-        this.deletePlayList()
+        this.isFavorite?this.unFavoritePlayList():this.deletePlayList()
       }
     }),
   })
@@ -41,18 +83,52 @@ struct PlayListDetail {
       if(res.data.code!=='200'){
         hilog.error(0x00002,'PLAYLIST','删除歌单失败')
         this.dialogController.close()
-        router.back()
       }
       else{
         router.back()
       }
-      router.back()
+    })
+  }
+
+  async unFavoritePlayList(){
+    await unFavorite(this.listid).then((res:AxiosResponse)=>{
+      if(res.data.code!=='200'){
+        hilog.error(0x00002,'PLAYLIST','取消收藏歌单失败')
+        this.dialogController.close()
+      }
+      else{
+        this.isFavorite = false
+      }
+    })
+  }
+
+  async favoritePlayList(){
+    await favorite(this.listid).then((res:AxiosResponse)=>{
+      if(res.data.code!=='200'){
+        hilog.error(0x00002,'PLAYLIST','收藏歌单失败')
+      }
+      else{
+        this.isFavorite = true
+        this.typemessage = '取消收藏此歌单'
+      }
+    })
+  }
+
+  async deleteMusic(deleid:number){
+    await removeMusic({ id:0,music_id:deleid,list_id: this.listid}).then((res:AxiosResponse)=>{
+      if(res.data.code!=='200'){
+        hilog.error(0x00002,'PLAYLIST','删除歌曲失败')
+      }
+      else{
+        this.musicList = this.musicList.filter(music => music.id !== deleid)
+        this.playlist.musicIds = this.playlist.musicIds.filter(id => id!==deleid)
+      }
     })
   }
 
   async setMusicList(){
     let avPlayer = await AVPlayerManager.getInstance()
-
+    await avPlayer.setMusicList(this.musicList)
   }
 
   @Builder itemHead() {
@@ -69,6 +145,9 @@ struct PlayListDetail {
     }
     .width('100%')
     .backgroundColor(Color.White)
+    .onClick(()=>{
+      this.setMusicList()
+    })
   }
 
 
@@ -83,13 +162,35 @@ struct PlayListDetail {
             router.back()
           })
 
-        Image($r('app.media.delete'))
-          .width(30)
-          .height(30)
-          .margin(10)
-          .onClick(()=>{
-            this.dialogController.open()
-          })
+        if(this.isCreator) {
+          Image($r('app.media.delete'))
+            .width(30)
+            .height(30)
+            .margin(10)
+            .onClick(() => {
+              this.dialogController.open()
+            })
+        }
+        else{
+          if(this.isFavorite){
+            Image($r('app.media.favoritefill'))
+              .width(30)
+              .height(30)
+              .margin(10)
+              .onClick(() => {
+                this.dialogController.open()
+              })
+          }
+          else {
+            Image($r('app.media.favorite'))
+              .width(30)
+              .height(30)
+              .margin(10)
+              .onClick(() => {
+                this.favoritePlayList()
+              })
+          }
+        }
       }
       .width('100%')
       .justifyContent(FlexAlign.SpaceBetween)
@@ -105,13 +206,11 @@ struct PlayListDetail {
 
               Column() {
                 Row() {
-                  Text(this.playlist.listName === '' ? 'test' : this.playlist.listName)
-                    .fontSize(40)
+                  Text(this.playlist.listName === '' ? 'null' : this.playlist.listName)
+                    .fontSize(20)
                 }
                 .height('50%')
-                .alignItems(VerticalAlign.Top)
-
-                Text('creatorName')
+                .alignItems(VerticalAlign.Center)
               }
               .height(130)
               .alignItems(HorizontalAlign.Start)
@@ -121,16 +220,41 @@ struct PlayListDetail {
           }
         }
 
-        ListItemGroup({ header: this.itemHead(), space: 20 }) {
-          ForEach(this.playlist.musicIds, (item: number,index:number) => {
-            ListItem() {
-              musicItem({ musicId: item , index: index + 1 , listId:this.listid})
+        if(this.musicList.length===0){
+          ListItem(){
+            Row(){
+              Text('暂无歌曲')
+                .fontColor(Color.Gray)
+                .fontSize(30)
             }
-          })
+            .justifyContent(FlexAlign.Center)
+            .alignItems(VerticalAlign.Center)
+          }
+          .width('100%')
+          .height('70%')
+        }
+        else {
+          ListItemGroup({ header: this.itemHead(), space: 20 }) {
+            ForEach(this.musicList, (item: Music, index: number) => {
+              if(this.isCreator){
+                ListItem() {
+                  musicItem({ music: item, index: index + 1, listId: this.listid , isCreator: this.isCreator,deleteMusic:()=>{this.deleteMusic(item.id)} , playMusic:()=>{this.playSong(item)}})
+                }
+              }
+              else{
+                ListItem() {
+                  musicItem({ music: item, index: index + 1, listId: this.listid ,deleteMusic:()=>{this.deleteMusic(item.id)}, playMusic:()=>{this.playSong(item)}})
+                }
+              }
+
+            })
+          }
         }
       }
-      .height('90%')
+      .height('85%')
       .sticky(StickyStyle.Header)
+
+      PlayBar()
     }
   }
 }
@@ -138,40 +262,23 @@ struct PlayListDetail {
 @Component
 struct musicItem{
   @Prop listId:number = 0
-  @Prop musicId:number = 0
+  @Prop isCreator:boolean = false
+  @Prop music:Music = EmptyMusic
   @Prop index: number = 0 // 用来传递次序
+  deleteMusic?:()=>void
+  playMusic?:()=>void
+
   dialogController: CustomDialogController = new CustomDialogController({
     builder: DeletePlayList({
-      type:'歌曲',
+      type:'从歌单删除此歌曲',
       delete:()=>{
-        router.back()
-        this.deleteMusic()
+        if(this.deleteMusic) {
+          this.deleteMusic()
+        }
       }
     }),
   })
-  music:Music = EmptyMusic
 
-  async aboutToAppear(){
-    await getMusicById(this.musicId).then((res:AxiosResponse)=>{
-      if(res.data.code === '200'){
-        this.music = res.data.result
-      }
-      else{
-        hilog.error(0x00002,'MUSIC','获取歌曲失败')
-      }
-    })
-  }
-
-  async deleteMusic(){
-    await removeMusic({ id:0,music_id:this.musicId,list_id: this.listId}).then((res:AxiosResponse)=>{
-      if(res.data.code!=='200'){
-        hilog.error(0x00002,'PLAYLIST','删除歌曲失败')
-      }
-      else{
-        router.back()
-      }
-    })
-  }
 
   build() {
     Row(){
@@ -185,25 +292,41 @@ struct musicItem{
 
         Text(this.music.musicName)
           .fontSize(20)
+          .height(20)
+          .maxFontSize(20)
+          .minFontSize(10)
 
         Text(this.music.singer)
+          .fontSize(10)
+          .height(10)
+          .maxFontSize(10)
+          .minFontSize(5)
+          .fontColor(Color.Gray)
       }
       .alignItems(HorizontalAlign.Start)
-      .width('55%')
+      .width('65%')
 
       Column() {
-        Image($r('app.media.remove'))
-          .width(20)
-          .height(20)
-          .onClick(()=>{
-            this.dialogController.open()
-          })
+        if(this.isCreator) {
+          Image($r('app.media.remove'))
+            .width(20)
+            .height(20)
+            .onClick(() => {
+              this.dialogController.open()
+            })
+        }
       }
        .width('20%')
     }
     .justifyContent(FlexAlign.SpaceBetween)
     .width('100%')
     .height(40)
+    .onClick(()=>{
+      if(this.playMusic){
+        this.playMusic()
+        router.pushUrl({url: 'pages/Detail'})
+      }
+    })
   }
 }
 
@@ -218,13 +341,13 @@ struct DeletePlayList {
   build() {
     Row(){
       Column(){
-        Text('确认要删除此'+this.type)
+        Text('确认要'+this.type)
           .fontSize(20)
 
         Blank().height(20)
 
         Row(){
-          Text('删除')
+          Text('确认')
             .fontColor(Color.Red)
             .fontSize(20)
             .onClick(()=>{
