@@ -1,4 +1,5 @@
 import { router } from '@kit.ArkUI';
+import { fetchMediaData } from '../manager/MediaDataHandler';
 
 @Entry
 @Component
@@ -12,6 +13,9 @@ struct CreatePlayList {
       //更新当前的图片的uri
       if(params.picUri){
         this.message = params.picUri;
+        
+        //获取图片数据，类型为ArrayBuffer
+        fetchMediaData(params.picUri, (data: ArrayBuffer)=>{console.info("获取成功")})
       }
     }
   }
