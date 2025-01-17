@@ -16,6 +16,7 @@ export struct SearchPage {
   @StorageProp('currentState') currentState: PlayState = PlayState.PAUSE
   avPlayer: AVPlayerManager | null = null
   name: string = '';
+  search: string = '0';
   controller: SearchController = new SearchController()
 
   async aboutToAppear() {
@@ -28,6 +29,7 @@ export struct SearchPage {
   }
 
   async fetchRecommendedContent() {
+    this.search = '1'
     searchMusic(this.name).then((res:AxiosResponse) => {
       if (res.data.code === '200') {
         const allMusic: Array<Music> = res.data.result;
@@ -56,54 +58,67 @@ export struct SearchPage {
         })
         .margin(20)
 
+      if(this.List.length < 1 && this.search == '1'){
+        Column() {
+          Image($r('app.media.planet'))
+            .width('80%')
+            .height('80%')
 
-      List() {
-        ForEach(this.List, (history: Music, index: number) => {
-          ListItem() {
-            Row() {
-              if (history.id == this.currentMusic.id) { // 当前播放中的音乐
-                Row() {
-                  if (this.currentState == PlayState.PAUSE) {
-                    Image($r("app.media.play1"))
-                      .width(40)
-                      .height(40)
-                      .margin({ left: 15 })
+          Text('哎呀，什么也没有找到呢...')
+            .width('80%')
+            .margin({ top: 10 })
+            .fontSize(20)
+        }
+      }else{
+        List() {
+          ForEach(this.List, (history: Music, index: number) => {
+            ListItem() {
+              Row() {
+                if (history.id == this.currentMusic.id) { // 当前播放中的音乐
+                  Row() {
+                    if (this.currentState == PlayState.PAUSE) {
+                      Image($r("app.media.play1"))
+                        .width(40)
+                        .height(40)
+                        .margin({ left: 15 })
+                        .onClick(() => {
+                          this.avPlayer?.continue()
+                        })
+                    } else {
+                      Image($r("app.media.pause1"))
+                        .width(40)
+                        .height(40)
+                        .margin({ left: 15 })
+                        .onClick(() => {
+                          this.avPlayer?.pause()
+                        })
+                    }
+
+                    MusicItem({ music: history })
                       .onClick(() => {
-                        this.avPlayer?.continue()
-                      })
-                  } else {
-                    Image($r("app.media.pause1"))
-                      .width(40)
-                      .height(40)
-                      .margin({ left: 15 })
-                      .onClick(() => {
-                        this.avPlayer?.pause()
+                        this.playHistoryMusic(index)
                       })
                   }
 
+                } else {
                   MusicItem({ music: history })
                     .onClick(() => {
                       this.playHistoryMusic(index)
                     })
                 }
-
-              } else {
-                MusicItem({ music: history })
-                  .onClick(() => {
-                    this.playHistoryMusic(index)
-                  })
               }
             }
-          }
+          })
+        }
+        .divider({
+          strokeWidth: 1,
+          startMargin: 15,
+          endMargin: 15,
+          color: '#ffe9f0f0'
         })
+        .height('73%')
       }
-      .divider({
-        strokeWidth: 1,
-        startMargin: 15,
-        endMargin: 15,
-        color: '#ffe9f0f0'
-      })
-      .height('73%')
+
     }
   }
 }
