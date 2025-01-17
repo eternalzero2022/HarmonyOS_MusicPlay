@@ -16,6 +16,7 @@ export struct SearchPage {
   @StorageProp('currentState') currentState: PlayState = PlayState.PAUSE
   avPlayer: AVPlayerManager | null = null
   name: string = '';
+  controller: SearchController = new SearchController()
 
   async aboutToAppear() {
     this.avPlayer = await AVPlayerManager.getInstance()
@@ -38,26 +39,23 @@ export struct SearchPage {
   build() {
     Column() {
 
-      TextInput({ placeholder: '搜索', text: this.name })
+      Search({ value: this.name, placeholder: 'search...', controller: this.controller })
+        .searchButton('搜索')
+        .width('95%')
+        .height(40)
+        .backgroundColor('#F5F5F5')
+        .placeholderColor(Color.Grey)
+        .placeholderFont({ size: 14, weight: 400 })
+        .textFont({ size: 14, weight: 400 })
+        .onSubmit((value: string) => {
+          this.name = value;
+          this.fetchRecommendedContent();
+        })
         .onChange((value: string) => {
           this.name = value;
         })
-        .fontSize(18)
-        .fontColor(Color.Black)
-        .width('100%')
-        .height(50)
-        .padding({ left: 10, right: 10 })
+        .margin(20)
 
-      Button('搜索')
-        .width('30%')
-        .height(40)
-        .backgroundColor(Color.Red)
-        .fontSize(18)
-        .fontColor(Color.White)
-        .onClick(() => {
-          this.fetchRecommendedContent();
-        })
-        .margin({ top: 56 });
 
       List() {
         ForEach(this.List, (history: Music, index: number) => {
