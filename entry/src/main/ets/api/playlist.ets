@@ -28,16 +28,16 @@ export const EmptyPlayList:playList = {
   isFavorite: false
 }
 
-export const TestPlayList:playList = {
+export const NewPlayList:playList = {
   id: 0,
-  listName: 'test',
+  listName: '',
   imageUrl: '',
   creatorId: null,
   date: null,
-  share: false,
+  share: true,
   rate: 0,
   rateNum: 0,
-  musicIds: [1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3],
+  musicIds: [],
   isFavorite: false
 }
 

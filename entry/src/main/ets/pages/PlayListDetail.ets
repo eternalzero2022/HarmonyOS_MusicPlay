@@ -1,7 +1,7 @@
 import { AxiosResponse } from '@ohos/axios';
 import { deleteList, EmptyPlayList,
   favorite,
-  getPlayListById, playList, removeMusic, TestPlayList,
+  getPlayListById, playList, removeMusic,
   unFavorite } from '../api/playlist';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { router } from '@kit.ArkUI';
@@ -18,11 +18,13 @@ struct PlayListDetail {
 
   @StorageLink('user') user: User = EmptyUser
   @State listid: number = (router.getParams() as Record<string,number>)['listId']
+  @State from: boolean = (router.getParams() as Record<string,boolean>)['from']
   @State isFavorite: boolean | null = false
   @State isCreator: boolean = false
   @State typemessage: string = ''
   @State playlist:playList = EmptyPlayList
   @State musicList: Music[] = []
+  frash: boolean = false
 
 
   async playSong(music:Music){
@@ -30,7 +32,7 @@ struct PlayListDetail {
     await avPlayer.playSong(music)
   }
 
-  async onPageShow(){
+  async aboutToAppear(){
     await getPlayListById(this.listid).then(async (res:AxiosResponse)=>{
       if(res.data.code==='200'){
         this.playlist = res.data.result
@@ -85,7 +87,13 @@ struct PlayListDetail {
         this.dialogController.close()
       }
       else{
-        router.back()
+        this.frash = true
+        if(this.from){
+          router.pushUrl({url:'pages/Index',params:{index:1}})
+        }
+        else{
+          router.back()
+        }
       }
     })
   }
@@ -98,6 +106,7 @@ struct PlayListDetail {
       }
       else{
         this.isFavorite = false
+        this.frash = true
       }
     })
   }
@@ -109,6 +118,7 @@ struct PlayListDetail {
       }
       else{
         this.isFavorite = true
+        this.frash = true
         this.typemessage = '取消收藏此歌单'
       }
     })
@@ -159,7 +169,12 @@ struct PlayListDetail {
           .height(40)
           .margin(10)
           .onClick(() => {
-            router.back()
+            if(this.from){
+              router.pushUrl({url:'pages/Index',params:{index:1}})
+            }
+            else{
+              router.back()
+            }
           })
 
         if(this.isCreator) {

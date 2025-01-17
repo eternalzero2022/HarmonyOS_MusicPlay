@@ -26,7 +26,7 @@ struct Index {
 
   @State history:string = ""
 
-  @State selectedTab:string = 'home';
+  @State selectedTab:string = router.getParams()?'playlist':'home';
 
   @State recommendedSongs: Music[] = []
   @State recommendedPlaylists:playList[] = []
@@ -354,7 +354,7 @@ struct Index {
                               .onClick(() => {
                                 router.pushUrl({
                                   url:'pages/PlayListDetail',
-                                  params: { listId : playlist.id }
+                                  params: { listId : playlist.id , from : false}
                                 })
                               })
                             Text(playlist.listName)

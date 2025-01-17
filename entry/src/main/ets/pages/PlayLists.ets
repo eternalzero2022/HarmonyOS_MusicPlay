@@ -65,56 +65,16 @@ export struct PlayListPage{
     })
   }
 
-  onShow(){
-    getListIds().then(async (res:AxiosResponse)=>{
-      if(res.data.code==='200'){
-        this.listIds = res.data.result as number[]
-        if (this.listIds && this.listIds.length > 0) {
-          // 按顺序请求所有的音乐信息
-          for (const id of this.listIds) {
-            try {
-              await getPlayListById(id).then((res:AxiosResponse)=>{
-                if (res.data.code === '200') {
-                  this.playlists.push(res.data.result) // 添加到音乐列表中
-                } else {
-                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
-                }
-              })
-            } catch (error) {
-              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
-            }
-          }
-        }
-      }
-      else{
-        hilog.error(0x00002,'PLAYLIST','获取列表id失败')
-      }
-    })
-    getFavoriteListIds().then(async (res:AxiosResponse)=>{
-      if(res.data.code==='200'){
-        this.favoriteIds = res.data.result as number[]
-        if (this.favoriteIds && this.favoriteIds.length > 0) {
-          // 按顺序请求所有的音乐信息
-          for (const id of this.favoriteIds) {
-            try {
-              await getPlayListById(id).then((res:AxiosResponse)=>{
-                if (res.data.code === '200') {
-                  this.favplaylists.push(res.data.result) // 添加到音乐列表中
-                } else {
-                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
-                }
-              })
-            } catch (error) {
-              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
-            }
-          }
-        }
-      }
-      else{
-        hilog.error(0x00002,'PLAYLIST','获取收藏列表id失败')
-      }
-    })
-  }
+  // deletePlayList(id:number){
+  //   this.listIds = this.listIds.filter(id => id!==id)
+  //   this.playlists = this.playlists.filter(list => list.id !== id)
+  // }
+  //
+  // unFavoritePlayList(id:number){
+  //   this.favoriteIds = this.favoriteIds.filter(id => id!==id)
+  //   this.favplaylists = this.favplaylists.filter(list => list.id !== id)
+  // }
+
 
   //自定义tabbar渲染器
   @Builder tabBuilder(title: string, targetIndex: number) {
@@ -143,7 +103,7 @@ export struct PlayListPage{
                 List({ space: 10 }) {
                   ForEach(this.playlists, (item: playList) => {
                     ListItem() {
-                      playListItem({ playlist:item })
+                      playListItem({ playlist:item})
                     }
                   })
                 }
@@ -248,7 +208,7 @@ struct playListItem{
       .onClick(()=>{
         router.pushUrl({
           url: 'pages/PlayListDetail',
-          params: { listId: this.playlist.id ,isFavorite: this.isFavorite}
+          params: { listId: this.playlist.id , from: true }
         });
       });
     } else {
