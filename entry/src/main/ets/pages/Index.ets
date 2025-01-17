@@ -10,7 +10,7 @@ import { Constants } from '../constants/Constants';
 import { getAllMusic } from '../api/music';
 import { AxiosResponse } from '@ohos/axios';
 import { PlayListPage } from './PlayLists';
-
+import { SearchPage } from '../pages/SearchPage'
 /**
  * AVPlayerManager和DatabaseManager使用示例
  */
@@ -222,6 +222,7 @@ struct Index {
                   this.getHistory()
                 })
 
+
               Text(this.message).fontSize(20)
             }
           } else if (this.selectedTab === 'home') {
@@ -232,6 +233,10 @@ struct Index {
                   .margin({ top: 10 })
                   .fontSize(45)
 
+                TextInput({ placeholder: '搜索' })
+                  .onClick( ()=> {
+                    this.selectedTab = 'search';
+                  })
                 // 轮播图展示推荐歌曲的封面
                 Swiper(this.swiperController) {
                   ForEach(this.recommendedSongs, (song: Music) => {
@@ -355,6 +360,10 @@ struct Index {
           } else if (this.selectedTab === 'my') {
             Column() {
               MinePage()
+            }
+          }else if (this.selectedTab === 'search') {
+            Column() {
+              SearchPage()
             }
           }
         }
