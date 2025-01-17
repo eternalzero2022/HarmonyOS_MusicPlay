@@ -2,6 +2,9 @@ import { AVPlayerManager } from '../manager/AVPlayerManager'
 import { router } from '@kit.ArkUI'
 import { Music, MusicPlayStrategy, PlayState, EmptyMusic } from '../viewmodel/MusicViewModel';
 import { Constants } from '../constants/Constants';
+import { addMusic, EmptyPlayList, getListIds, getPlayListById, playList } from '../api/playlist';
+import { AxiosResponse } from '@ohos/axios';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 @Entry
 @Component
@@ -12,11 +15,54 @@ struct Detail {
   @StorageProp('currentTime') currentTime: number = 0
   @StorageProp('totalTime') totalTime: number = 1
   @State listPopup: boolean = false
+  @State listIds: number[] = []
 
   avPlayer: AVPlayerManager | null = null
 
+  addMusicToPlayList(musicid:number,listid:number){
+    addMusic({id:0,music_id:musicid,list_id:listid}).then((res:AxiosResponse)=>{
+      if(res.data.code==='200'){
+        this.listPopup = !this.listPopup
+      }
+      else{
+        hilog.error(0x00002,'MUSIC',`加入歌单失败 ${musicid} ${listid}`)
+      }
+    })
+  }
+
+  @Builder popupBuilder() {
+    Column() {
+      Blank().height('2%')
+      Row() {
+        Text('添加到歌单')
+          .fontSize(20)
+      }
+      .justifyContent(FlexAlign.Center)
+      .width('100%')
+
+      List() {
+        ForEach(this.listIds, (item: number) => {
+          ListItem() {
+            playListItem({ listid: item , musicid: this.currentMusic.id , add:()=>{this.addMusicToPlayList(this.currentMusic.id,item)}})
+          }
+        })
+      }.width('90%')
+      .height('80%')
+    }
+    .height('40%')
+    .justifyContent(FlexAlign.Start)
+  }
+
   async aboutToAppear() {
     this.avPlayer = await AVPlayerManager.getInstance()
+    getListIds().then((res:AxiosResponse)=>{
+      if(res.data.code==='200'){
+        this.listIds = res.data.result as number[]
+      }
+      else{
+        hilog.error(0x00002,'PLAYLIST','获取列表id失败')
+      }
+    })
   }
 
   async changeStrategy() {
@@ -83,7 +129,7 @@ struct Detail {
       Row(){
         Column() {
           Text(this.currentMusic.musicName)
-            .fontSize(50)
+            .fontSize(30)
 
           Text(this.currentMusic.singer)
             .fontSize(20)
@@ -93,14 +139,8 @@ struct Detail {
       .width('100%')
       .height('10%')
 
-      Blank().height('2%')
+      Blank().height('10%')
 
-
-      Row(){
-        Text('歌词')
-      }
-      .width('100%')
-      .height('15%')
 
       Row() {
         Slider({ value: this.currentTime, max: this.totalTime, style: SliderStyle.OutSet })
@@ -113,6 +153,7 @@ struct Detail {
       }
       .width('100%')
 
+      Blank().height('5%')
 
       Row(){
         Row() {
@@ -175,6 +216,19 @@ struct Detail {
           .width(40)
           .height(40)
           .margin(5)
+          .onClick(()=>{
+            this.listPopup = !this.listPopup
+          })
+          .bindPopup(this.listPopup, {
+            builder: this.popupBuilder, // 气泡的内容
+            placement:Placement.Bottom, // 气泡的弹出位置
+            popupColor:0xF1F3F5, // 气泡的背景色
+            onStateChange: (e) => {
+              if (!e.isVisible) {
+                this.listPopup = false
+              }
+            }
+          })
 
       }
       .layoutWeight(1)
@@ -182,6 +236,54 @@ struct Detail {
       .margin({ right: 20 })
       .width('100%')
       .height('10%')
+    }
+  }
+}
+
+@Component
+struct playListItem{
+  @Prop listid: number = 0
+  @Prop musicid: number = 0
+  @State playlist:playList = EmptyPlayList
+  add?:()=>void
+
+  aboutToAppear(){
+    getPlayListById(this.listid).then((res:AxiosResponse)=>{
+      if(res.data.code==='200'){
+        this.playlist = res.data.result as playList
+      }
+      else{
+        hilog.error(0x00002,'PLAYLIST','获取歌单失败')
+      }
+    })
+  }
+
+  build() {
+    if (this.playlist && this.playlist.id) { // 确保 playlist 数据存在
+      Row() {
+        Image(this.playlist.imageUrl === '' ? Constants.DEFAULT_MUSIC_IMAGE : this.playlist.imageUrl)
+          .width(40)
+          .height(40)
+          .borderRadius(10)
+          .margin(5);
+        Text(this.playlist.listName)
+          .fontSize(20);
+      }
+      .height(100)
+      .width('100%')
+      .backgroundColor(Color.White)
+      .onClick(()=>{
+        if(this.add){
+          this.add()
+        }
+      })
+    } else {
+      // 在数据加载完成之前，可以添加一个加载中的提示
+      Row() {
+        Text('加载中...')
+          .fontSize(20)
+          .fontColor(Color.Gray);
+      }
     }
   }
 }

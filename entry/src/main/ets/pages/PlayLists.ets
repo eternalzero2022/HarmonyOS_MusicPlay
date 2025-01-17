@@ -8,22 +8,107 @@ import { router } from "@kit.ArkUI"
 @Entry
 @Component
 export struct PlayListPage{
-  listIds: number[] = [1,2,3,1,2,3,1,2,3,1,2,3,1,2,3]
-  favoriteIds: number[] = [1,2,3,1,2,3,1,2,3,1,2,3,1,2,3]
+  @State listIds: number[] = []
+  @State favoriteIds: number[] = []
   @State currentIndex: number = 0
+  @State playlists: playList[] = []
+  @State favplaylists: playList[] = []
 
-  async aboutToAppear(){
-    await getListIds().then((res:AxiosResponse)=>{
+  aboutToAppear(){
+    getListIds().then(async (res:AxiosResponse)=>{
       if(res.data.code==='200'){
-        this.listIds = res.data.result
+        this.listIds = res.data.result as number[]
+        if (this.listIds && this.listIds.length > 0) {
+          // 按顺序请求所有的音乐信息
+          for (const id of this.listIds) {
+            try {
+              await getPlayListById(id).then((res:AxiosResponse)=>{
+                if (res.data.code === '200') {
+                  this.playlists.push(res.data.result) // 添加到音乐列表中
+                } else {
+                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
+                }
+              })
+            } catch (error) {
+              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
+            }
+          }
+        }
       }
       else{
         hilog.error(0x00002,'PLAYLIST','获取列表id失败')
       }
     })
-    await getFavoriteListIds().then((res:AxiosResponse)=>{
+    getFavoriteListIds().then(async (res:AxiosResponse)=>{
       if(res.data.code==='200'){
-        this.favoriteIds = res.data.result
+        this.favoriteIds = res.data.result as number[]
+        if (this.favoriteIds && this.favoriteIds.length > 0) {
+          // 按顺序请求所有的音乐信息
+          for (const id of this.favoriteIds) {
+            try {
+              await getPlayListById(id).then((res:AxiosResponse)=>{
+                if (res.data.code === '200') {
+                  this.favplaylists.push(res.data.result) // 添加到音乐列表中
+                } else {
+                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
+                }
+              })
+            } catch (error) {
+              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
+            }
+          }
+        }
+      }
+      else{
+        hilog.error(0x00002,'PLAYLIST','获取收藏列表id失败')
+      }
+    })
+  }
+
+  onShow(){
+    getListIds().then(async (res:AxiosResponse)=>{
+      if(res.data.code==='200'){
+        this.listIds = res.data.result as number[]
+        if (this.listIds && this.listIds.length > 0) {
+          // 按顺序请求所有的音乐信息
+          for (const id of this.listIds) {
+            try {
+              await getPlayListById(id).then((res:AxiosResponse)=>{
+                if (res.data.code === '200') {
+                  this.playlists.push(res.data.result) // 添加到音乐列表中
+                } else {
+                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
+                }
+              })
+            } catch (error) {
+              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
+            }
+          }
+        }
+      }
+      else{
+        hilog.error(0x00002,'PLAYLIST','获取列表id失败')
+      }
+    })
+    getFavoriteListIds().then(async (res:AxiosResponse)=>{
+      if(res.data.code==='200'){
+        this.favoriteIds = res.data.result as number[]
+        if (this.favoriteIds && this.favoriteIds.length > 0) {
+          // 按顺序请求所有的音乐信息
+          for (const id of this.favoriteIds) {
+            try {
+              await getPlayListById(id).then((res:AxiosResponse)=>{
+                if (res.data.code === '200') {
+                  this.favplaylists.push(res.data.result) // 添加到音乐列表中
+                } else {
+                  hilog.error(0x00002, 'PLAYLIST', `获取列表 ${id} 失败`)
+                }
+              })
+            } catch (error) {
+              hilog.error(0x00002, 'PLAYLIST', `请求列表 ${id} 发生错误`, error)
+            }
+          }
+        }
       }
       else{
         hilog.error(0x00002,'PLAYLIST','获取收藏列表id失败')
@@ -45,10 +130,6 @@ export struct PlayListPage{
     .justifyContent(FlexAlign.Center)
   }
 
-  dialogController: CustomDialogController = new CustomDialogController({
-    builder: CustomDialogExample(),
-  })
-
   build() {
     Stack() {
 
@@ -57,11 +138,26 @@ export struct PlayListPage{
         TabContent() {
           Scroll() {
             Column() {
-              Blank().height(10)
-              List({ space: 10 }) {
-                ForEach(this.listIds,(item:number)=>{
-                  playListItem({listid:item})
-                })
+              if(this.listIds.length>0) {
+                Blank().height(10)
+                List({ space: 10 }) {
+                  ForEach(this.playlists, (item: playList) => {
+                    ListItem() {
+                      playListItem({ playlist:item })
+                    }
+                  })
+                }
+              }
+              else{
+                Column(){
+                  Text('暂无歌单')
+                    .fontColor(Color.Gray)
+                    .fontSize(50)
+                }
+                .alignItems(HorizontalAlign.Center)
+                .justifyContent(FlexAlign.Center)
+                .width('100%')
+                .height('80%')
               }
             }
             .height('100%')
@@ -74,11 +170,26 @@ export struct PlayListPage{
         TabContent() {
           Scroll() {
             Column() {
-              Blank().height(10)
-              List({ space: 10 }) {
-                ForEach(this.favoriteIds,(item:number)=>{
-                  playListItem({listid:item})
-                })
+              if(this.favoriteIds.length>0) {
+                Blank().height(10)
+                List({ space: 10 }) {
+                  ForEach(this.favplaylists, (item: playList) => {
+                    ListItem() {
+                      playListItem({ playlist:item ,isFavorite: true})
+                    }
+                  })
+                }
+              }
+              else{
+                Column(){
+                  Text('暂无歌单')
+                    .fontColor(Color.Gray)
+                    .fontSize(50)
+                }
+                .alignItems(HorizontalAlign.Center)
+                .justifyContent(FlexAlign.Center)
+                .width('100%')
+                .height('80%')
               }
             }
             .height('100%')
@@ -106,7 +217,7 @@ export struct PlayListPage{
       .backgroundColor(Color.White)
       .position({x: '75%', y: '85%'})
       .onClick(() => {
-        this.dialogController.open()
+        router.pushUrl({url:'pages/CreatePlayList'})
       })
 
     }
@@ -116,85 +227,40 @@ export struct PlayListPage{
 
 @Component
 struct playListItem{
-  @Prop listid: number = 0;
-  playlist:playList = EmptyPlayList
+  @Prop isFavorite: boolean = false
+  @Prop playlist:playList = EmptyPlayList
 
-  async aboutToAppear(){
-    await getPlayListById(this.listid).then((res:AxiosResponse)=>{
-      if(res.data.code==='200'){
-        this.playlist = res.data.result
-      }
-      else{
-        hilog.error(0x00002,'PLAYLIST','获取歌单失败')
-      }
-    })
-  }
 
   build() {
-    Row(){
-      Image(this.playlist.imageUrl === ''? Constants.DEFAULT_MUSIC_IMAGE : this.playlist.imageUrl)
-        .width(70)
-        .height(70)
-        .borderRadius(10)
-        .margin(20)
-      Text(this.playlist.listName===''?'test':this.playlist.listName)
-        .fontSize(30)
-    }
-    .height(100)
-    .width('100%')
-    .backgroundColor(Color.White)
-    .onClick(()=>{
-      router.pushUrl({
-        url:'pages/PlayListDetail',
-        params: { listId : this.listid }
-      })
-    })
-  }
-}
-
-@CustomDialog
-struct CustomDialogExample {
-  controller: CustomDialogController = new CustomDialogController({
-    builder: CustomDialogExample({}),
-  })
-
-  build() {
-    Column() {
-      Blank().height('5%')
+    if (this.playlist && this.playlist.id) { // 确保 playlist 数据存在
       Row() {
-        Column() {
-          Text('取消')
-            .onClick(() => {
-              this.controller.close()
-            })
-        }
-        .alignItems(HorizontalAlign.Start)
-        Column(){
-          Text('创建歌单')
-            .fontSize(20)
-        }
-        .alignItems(HorizontalAlign.Center)
-        Column(){
-          Text('创建')
-            .onClick(() => {
-              this.controller.close()
-            })
-        }
-        .alignItems(HorizontalAlign.End)
+        Image(this.playlist.imageUrl === '' ? Constants.DEFAULT_MUSIC_IMAGE : this.playlist.imageUrl)
+          .width(70)
+          .height(70)
+          .borderRadius(10)
+          .margin(20);
+        Text(this.playlist.listName)
+          .fontSize(20);
       }
-      .justifyContent(FlexAlign.SpaceBetween)
+      .height(100)
       .width('100%')
-      .height('15%')
-
+      .backgroundColor(Color.White)
+      .onClick(()=>{
+        router.pushUrl({
+          url: 'pages/PlayListDetail',
+          params: { listId: this.playlist.id ,isFavorite: this.isFavorite}
+        });
+      });
+    } else {
+      // 在数据加载完成之前，可以添加一个加载中的提示
       Row() {
-        TextInput({ placeholder: '请输入新建歌单名称' })
-          .width('100%')
+        Text('加载中...')
+          .fontSize(20)
+          .fontColor(Color.Gray);
       }
-      .width('80%')
-      .height('80%')
     }
-    .width('90%')
-    .height('20%')
   }
 }
+
+
 

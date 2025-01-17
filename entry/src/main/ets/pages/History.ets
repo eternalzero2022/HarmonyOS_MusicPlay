@@ -55,55 +55,63 @@ export struct History {
       .width('100%')
       .justifyContent(FlexAlign.Start)
 
-      // 历史记录列表
-      List() {
-        ForEach(this.historyList, (history: Music, index: number) => {
-          ListItem() {
-            Row() {
-              if (history.id == this.currentMusic.id) { // 当前播放中的音乐
-                Row() {
-                  if (this.currentState == PlayState.PAUSE) {
-                    Image($r("app.media.play1"))
-                      .width(40)
-                      .height(40)
-                      .margin({ left: 15 })
+      if (this.historyList.length > 0) {
+        // 历史记录列表
+        List() {
+          ForEach(this.historyList, (history: Music, index: number) => {
+            ListItem() {
+              Row() {
+                if (history.id == this.currentMusic.id) { // 当前播放中的音乐
+                  Row() {
+                    if (this.currentState == PlayState.PAUSE) {
+                      Image($r("app.media.play1"))
+                        .width(40)
+                        .height(40)
+                        .margin({ left: 15 })
+                        .onClick(() => {
+                          this.avPlayer?.continue()
+                        })
+                    } else {
+                      Image($r("app.media.pause1"))
+                        .width(40)
+                        .height(40)
+                        .margin({ left: 15 })
+                        .onClick(() => {
+                          this.avPlayer?.pause()
+                        })
+                    }
+
+                    MusicItem({ music: history })
                       .onClick(() => {
-                        this.avPlayer?.continue()
-                      })
-                  } else {
-                    Image($r("app.media.pause1"))
-                      .width(40)
-                      .height(40)
-                      .margin({ left: 15 })
-                      .onClick(() => {
-                        this.avPlayer?.pause()
+                        this.playHistoryMusic(index)
                       })
                   }
 
+                } else {
                   MusicItem({ music: history })
                     .onClick(() => {
                       this.playHistoryMusic(index)
                     })
                 }
-
-              } else {
-                MusicItem({ music: history })
-                  .onClick(() => {
-                    this.playHistoryMusic(index)
-                  })
               }
             }
-          }
-          .swipeAction({ end: this.deleteHistory(index) }) // 左滑删除
+            .swipeAction({ end: this.deleteHistory(index) }) // 左滑删除
+          })
+        }
+        .divider({
+          strokeWidth: 1,
+          startMargin: 15,
+          endMargin: 15,
+          color: '#ffe9f0f0'
         })
+        .height('73%')
+      } else {
+        Text('暂无播放记录')
+          .fontSize(16)
+          .fontColor(Color.Gray)
+          .padding(30)
+
       }
-      .divider({
-        strokeWidth: 1,
-        startMargin: 15,
-        endMargin: 15,
-        color: '#ffe9f0f0'
-      })
-      .height('73%')
     }
   }
 }
